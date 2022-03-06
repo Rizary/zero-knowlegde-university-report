@@ -1,6 +1,6 @@
 #!/usr/bin/env just --justfile
 # ^ A shebang isn't required, but allows a justfile to be executed
-#   like a script, with `./justfile test`, for example.
+#   like a scripts, with `./justfile test`, for example.
 
 # Export all the variable needed to run all command.
 # You can change CIRCOM_NAME and CIRCOM_PTAU_NUM for
@@ -37,7 +37,7 @@ alias help := default
 
 # run geth on localhost
 run-geth:
-    . ./script/geth.sh
+    . ./scripts/geth.sh
 
 # run all command from compiling circom to generating proof and then verify it.
 all-circom: compile-circom run-ptau run-phase2 run-proof run-verify
@@ -47,27 +47,27 @@ all-circom-cleaned: clean-all all-circom
 
 # compile circom and store the result in the circom_out folder
 compile-circom:
-    ./script/circom.sh
+    ./scripts/circom.sh
 
 # preparing powers of tau ceremony and phase 2
 run-ptau:
-    ./script/ptau.sh
+    ./scripts/ptau.sh
     
 # run phase2 for specific circuit
 run-phase2:
-    ./script/phase2.sh
+    ./scripts/phase2.sh
     
 # generate a zk-proof associated to the circuit and the witness
 run-proof:
-    ./script/proof.sh
+    ./scripts/proof.sh
     
 # verifying the proof
 run-verify:
-    ./script/verify.sh
+    ./scripts/verify.sh
 
 # generate a solidity verifier that allows verifying proofs on ethereum blockchain
 export-solidity:
-    ./script/solidity.sh
+    ./scripts/solidity.sh
 
 # clean .ptau files
 clean-ptau:
@@ -88,6 +88,8 @@ clean-all:
     # Check if circom is compiled or not
     if [[ -z "${CIRCOM_OUT_DIR}" ]]; then
         echo 'Cleanup All Environment' >&2
-        ./script/clean_env.sh
+        ./scripts/clean_env.sh
     fi
-    
+
+deploy-hardhat:
+    npx hardhat run ./scripts/deploy.ts
