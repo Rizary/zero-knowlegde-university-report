@@ -43,7 +43,7 @@ run-geth:
 all-circom: compile-circom run-ptau run-phase2 run-proof run-verify
 
 # run all command after cleanup all output
-all-circom-cleaned: clean-all all 
+all-circom-cleaned: clean-all all-circom 
 
 # compile circom and store the result in the circom_out folder
 compile-circom:
