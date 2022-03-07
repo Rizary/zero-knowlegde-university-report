@@ -1,46 +1,62 @@
-# Advanced Sample Hardhat Project
+# Zero-Knowledge University - Assignment 1
 
-This project demonstrates an advanced Hardhat use case, integrating other tools commonly used alongside Hardhat in the ecosystem.
+Welcome to my repository for any assignment on Zero-Knowledge University cohort March-April 2022.
+This repository contains all of my attempt in completing the cohort by doing assignments given by the university.
 
-The project comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts. It also comes with a variety of other tools, preconfigured to work with the project code.
+This branch contains all of my attempt to finish the Assignment-1 which runs between 28 February 2022 to 7 March 2022.
 
-Try running some of the following tasks:
+## About the assignment
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-npx hardhat help
-REPORT_GAS=true npx hardhat test
-npx hardhat coverage
-npx hardhat run scripts/deploy.ts
-TS_NODE_FILES=true npx ts-node scripts/deploy.ts
-npx eslint '**/*.{js,ts}'
-npx eslint '**/*.{js,ts}' --fix
-npx prettier '**/*.{json,sol,md}' --check
-npx prettier '**/*.{json,sol,md}' --write
-npx solhint 'contracts/**/*.sol'
-npx solhint 'contracts/**/*.sol' --fix
+In this repository, the assignment focus on:
+1. Intro to Circom
+2. NFT and Merkle Tree
+3. Ideas on ZK Technologies
+
+## How to run
+
+You will find all necessary command by typing `just list` and you'll see the following command:
+
+```bash
+$ just list
+Available recipes:
+    all             # run all command from compiling circom to generating proof and then verify it.
+    a               # alias for `all`
+    all-cleaned     # run all command after cleanup all output
+    ac              # alias for `all-cleaned`
+    clean-all       # clean all files in folder $CIRCOM_OUT_DIR and unset all environments
+    clean-proof     # clean proof .json file
+    clean-ptau      # clean .ptau files
+    clean-zkey      # clean .zkey files
+    compile-circom  # compile circom and store the result in the circom_out folder
+    default         # Show available commands
+    help            # alias for `default`
+    export-solidity # generate a solidity verifier that allows verifying proofs on ethereum blockchain
+    list            # Show available commands
+    run-geth        # run geth on localhost
+    run-phase2      # run phase2 for specific circuit
+    run-proof       # generate a zk-proof associated to the circuit and the witness
+    run-ptau        # preparing powers of tau ceremony and phase 2
+    run-verify      # verifying the proof
 ```
 
-# Etherscan verification
+## 1. Intro to Circom
+Before you run the command, please make sure the following executables are already in your `$PATH` variables:
+1. circom
+2. just
+3. snarkjs
+4. node
 
-To try out Etherscan verification, you first need to deploy a contract to an Ethereum network that's supported by Etherscan, such as Ropsten.
+If you want to compile and try `circom`, you can run `just all-circom`. run `just all-circom-cleaned` from a clean directory.
 
-In this project, copy the .env.example file to a file named .env, and then edit it to fill in the details. Enter your Etherscan API key, your Ropsten node URL (eg from Alchemy), and the private key of the account which will send the deployment transaction. With a valid .env file in place, first deploy your contract:
+You can change the `CIRCOM_NAME` and `CIRCOM_PTAU_NUM` if you want to try another file or different power of tau number, and let `just` handle the rest.
 
-```shell
-hardhat run --network ropsten scripts/deploy.ts
-```
+## 2. NFT and Merkle Tree
+My first attempt was hardhat when trying to do the assignment, however I found Remix is more better than hardhat for simplicity and clean UI. The important part of the second assignment question is reside in `contract` folder, and `scripts/deploy_ethers.js`. You can import those folders to Remix to try compiling for yourself.
 
-Then, copy the deployment address and paste it in to replace `DEPLOYED_CONTRACT_ADDRESS` in this command:
+The work on hardhat will be improved in the future.
 
-```shell
-npx hardhat verify --network ropsten DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
-```
+## 3. Ideas on ZK Technologies
+Since this assignment question do not have any written code, please refer to the `.pdf` report.
 
-# Performance optimizations
-
-For faster runs of your tests and scripts, consider skipping ts-node's type checking by setting the environment variable `TS_NODE_TRANSPILE_ONLY` to `1` in hardhat's environment. For more details see [the documentation](https://hardhat.org/guides/typescript.html#performance-optimizations).
+## Disclaimer
+1. Usually, we can put `circom_out` in our `.gitignore` file to avoid uploading unnecessary big size file. However, for submission purpose, I keep the folder for easier grading. Please note that the file `pot18_000.ptau` and `pot18_001.ptau` are removed due to unable to upload file larger than 50.00MB to GitHub.

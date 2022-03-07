@@ -12,14 +12,27 @@ async function main() {
   // If this script is run directly using `node` you may want to call compile
   // manually to make sure everything is compiled
   // await hre.run('compile');
+  
+  const [deployer] = await ethers.getSigners();
 
-  // We get the contract to deploy
-  const Greeter = await ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  console.log("Deploying contracts with the account:", deployer.address);
 
-  await greeter.deployed();
+  console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  console.log("Greeter deployed to:", greeter.address);
+  const MerkleTree = await ethers.getContractFactory("MerkleTree");
+  const merkletree = await MerkleTree.deploy();
+
+  await merkletree.deployed();
+
+  console.log("MerkleTree deployed to:", merkletree.address);
+    
+      // We get the contract to deploy
+  const ZkuNFTContract = await ethers.getContractFactory("ZkuNFTContract");
+  const zkunft = await ZkuNFTContract.deploy();
+
+  await zkunft.deployed();
+
+  console.log("ZkuNFTContract deployed to:", zkunft.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

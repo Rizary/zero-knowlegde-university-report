@@ -1925,7 +1925,7 @@ csoffset += 1773 ;
 aux_cmp_num += 4;
 }
 }
-if (!Fr_isTrue(&circuitConstants[3])) std::cout << "Failed assert in template " << myTemplateName << " line 25. " <<  "Followed trace: " << ctx->getTrace(myId) << std::endl;
+if (!Fr_isTrue(&circuitConstants[3])) std::cout << "Failed assert in template " << myTemplateName << " line 27. " <<  "Followed trace: " << ctx->getTrace(myId) << std::endl;
 assert(Fr_isTrue(&circuitConstants[3]));
 {
 PFrElement aux_dest = &lvar[1];
@@ -1957,7 +1957,7 @@ PFrElement aux_dest = &lvar[5];
 // end load src
 Fr_copy(aux_dest,&circuitConstants[1]);
 }
-Fr_lt(&expaux[0],&lvar[5],&circuitConstants[17]); // line circom 35
+Fr_lt(&expaux[0],&lvar[5],&circuitConstants[17]); // line circom 39
 while(Fr_isTrue(&expaux[0])){
 {
 uint cmp_index_ref = ((1 * Fr_toInt(&lvar[5])) + 0);
@@ -1996,11 +1996,11 @@ Fr_copy(aux_dest,&ctx->signalValues[ctx->componentMemory[mySubcomponents[((1 * F
 {
 PFrElement aux_dest = &lvar[5];
 // load src
-Fr_add(&expaux[0],&lvar[5],&circuitConstants[3]); // line circom 35
+Fr_add(&expaux[0],&lvar[5],&circuitConstants[3]); // line circom 39
 // end load src
 Fr_copy(aux_dest,&expaux[0]);
 }
-Fr_lt(&expaux[0],&lvar[5],&circuitConstants[17]); // line circom 35
+Fr_lt(&expaux[0],&lvar[5],&circuitConstants[17]); // line circom 39
 }
 {
 PFrElement aux_dest = &lvar[5];
@@ -2008,7 +2008,7 @@ PFrElement aux_dest = &lvar[5];
 // end load src
 Fr_copy(aux_dest,&circuitConstants[1]);
 }
-Fr_lt(&expaux[0],&lvar[5],&circuitConstants[15]); // line circom 41
+Fr_lt(&expaux[0],&lvar[5],&circuitConstants[15]); // line circom 47
 while(Fr_isTrue(&expaux[0])){
 {
 uint cmp_index_ref = ((1 * Fr_toInt(&lvar[5])) + 8);
@@ -2047,32 +2047,32 @@ Fr_copy(aux_dest,&ctx->signalValues[ctx->componentMemory[mySubcomponents[((1 * F
 {
 PFrElement aux_dest = &lvar[3];
 // load src
-Fr_add(&expaux[0],&lvar[3],&circuitConstants[5]); // line circom 46
+Fr_add(&expaux[0],&lvar[3],&circuitConstants[5]); // line circom 52
 // end load src
 Fr_copy(aux_dest,&expaux[0]);
 }
 {
 PFrElement aux_dest = &lvar[4];
 // load src
-Fr_add(&expaux[0],&lvar[4],&circuitConstants[5]); // line circom 47
+Fr_add(&expaux[0],&lvar[4],&circuitConstants[5]); // line circom 53
 // end load src
 Fr_copy(aux_dest,&expaux[0]);
 }
 {
 PFrElement aux_dest = &lvar[2];
 // load src
-Fr_add(&expaux[0],&lvar[2],&circuitConstants[3]); // line circom 48
+Fr_add(&expaux[0],&lvar[2],&circuitConstants[3]); // line circom 54
 // end load src
 Fr_copy(aux_dest,&expaux[0]);
 }
 {
 PFrElement aux_dest = &lvar[5];
 // load src
-Fr_add(&expaux[0],&lvar[5],&circuitConstants[3]); // line circom 41
+Fr_add(&expaux[0],&lvar[5],&circuitConstants[3]); // line circom 47
 // end load src
 Fr_copy(aux_dest,&expaux[0]);
 }
-Fr_lt(&expaux[0],&lvar[5],&circuitConstants[15]); // line circom 41
+Fr_lt(&expaux[0],&lvar[5],&circuitConstants[15]); // line circom 47
 }
 {
 PFrElement aux_dest = &signalValues[mySignalStart + 0];

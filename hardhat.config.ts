@@ -1,11 +1,11 @@
-import * as dotenv from "dotenv";
-
-import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
+import * as dotenv from "dotenv";
 import "hardhat-gas-reporter";
+import { HardhatUserConfig, task } from "hardhat/config";
 import "solidity-coverage";
+
 
 dotenv.config();
 
@@ -19,14 +19,15 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   }
 });
 
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
-
+// Alchemy API Key obtained from https://alchemyapi.io
+const ALCHEMY_API_KEY = "qOWXAnCv2uBxAKR6i5_yJCmkorfYUWZV";
+// Hardhat user configuration targeting Alchemy backend
+// and ropsten server on Ethereum network.
 const config: HardhatUserConfig = {
   solidity: "0.8.4",
   networks: {
     ropsten: {
-      url: process.env.ROPSTEN_URL || "",
+      url: process.env.ROPSTEN_URL,
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },

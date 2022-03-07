@@ -2,7 +2,11 @@
 # ^ A shebang isn't required, but allows a justfile to be executed
 #   like a scripts, with `./justfile test`, for example.
 
-# Export all the variable needed to run all command.
+# Set dotenv to true so just can find .env in the repository
+# and load the environment variable.
+set dotenv-load
+
+# Export all the variable needed to run all circom related command.
 # You can change CIRCOM_NAME and CIRCOM_PTAU_NUM for
 # specific filename and number of power of tau
 export CIRCOM_NAME := "merkletree"
@@ -21,6 +25,10 @@ export CIRCOM_PROOF:= CIRCOM_OUT_DIR + "/" + "proof.json"
 export CIRCOM_PUBLIC:= CIRCOM_OUT_DIR + "/" + "public.json"
 export VERIFIER_SOLIDITY := CIRCOM_OUT_DIR + "/" + "verifier.sol"
 
+# Export all the variable needed to run and deploy Solidity smart contract.
+# If you do not see anything, then the variable is already in `.env` file that can be
+# recognized by justfile which is not in the repository. Thus, please create
+# `.env` file and put all the necessary variables mentioned in .env.example
 
 alias ac := all-circom
 alias acc := all-circom-cleaned
@@ -91,5 +99,14 @@ clean-all:
         ./scripts/clean_env.sh
     fi
 
-deploy-hardhat:
-    npx hardhat run ./scripts/deploy.ts
+# compile the solidity contract using hardhat
+compile-contract:
+    npx hardhat compile
+
+# deploy the contract to the ropsten network
+deploy-contract:
+    npx hardhat run ./scripts/deploy.ts --network ropsten
+    
+# test the contract
+test-contract $REPORT_GAS='0' $EXTENDED_TESTS='0':
+    npx hardhat test
