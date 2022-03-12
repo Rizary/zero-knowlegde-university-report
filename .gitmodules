@@ -1,3 +1,6 @@
 [submodule "semaphore"]
 	path = semaphore
 	url = git@github.com:appliedzkp/semaphore.git
+[submodule "tornado-trees"]
+	path = tornado-trees
+	url = git@github.com:tornadocash/tornado-trees.git
