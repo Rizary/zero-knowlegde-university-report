@@ -4,3 +4,6 @@
 [submodule "tornado-trees"]
 	path = tornado-trees
 	url = git@github.com:tornadocash/tornado-trees.git
+[submodule "tornado-nova"]
+	path = tornado-nova
+	url = git@github.com:tornadocash/tornado-nova.git
