@@ -9,11 +9,13 @@ set dotenv-load
 # Export all the variable needed to run all circom related command.
 # You can change CIRCOM_NAME and CIRCOM_PTAU_NUM for
 # specific filename and number of power of tau
-export CIRCOM_NAME := "merkletree"
-export CIRCOM_PTAU_NUM := "18"
-export CIRCOM_PROJ_DIR := `pwd`
+export CIRCOM_NAME := "FairnessCardGameInit"
+export CIRCOM_INPUT_NAME := "input_init"
+export CIRCOM_DIRNAME := "FairnessCardGame"
+export CIRCOM_PTAU_NUM := "16"
+export CIRCOM_PROJ_DIR := "./" + CIRCOM_DIRNAME
 export CIRCOM_OUT_DIR := CIRCOM_PROJ_DIR + "/circom_out"
-export CIRCOM_OUT_JS := CIRCOM_OUT_DIR + "/merkletree_js"
+export CIRCOM_OUT_JS := CIRCOM_OUT_DIR + "/" + CIRCOM_NAME + "_js"
 export CIRCOM_WITNESS := CIRCOM_OUT_DIR + "/witness.wtns"
 export CIRCOM_PTAU_FNAME := CIRCOM_OUT_DIR + "/pot" + CIRCOM_PTAU_NUM + "_0000.ptau"
 export CIRCOM_PTAU_FNAME_AFT := CIRCOM_OUT_DIR + "/pot" + CIRCOM_PTAU_NUM + "_0001.ptau"

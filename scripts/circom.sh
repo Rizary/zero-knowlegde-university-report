@@ -33,7 +33,7 @@ fi;
 # As you noticed, the --output is there to make sure all the output from circom
 # command goes straight to the circom_out folder.
 echo "🌟 Compiling circom to circom_out folder"
-circom circom/$CIRCOM_NAME.circom --r1cs --wasm --sym --c --output $CIRCOM_OUT_DIR
+circom $CIRCOM_PROJ_DIR/circom/$CIRCOM_NAME.circom --r1cs --wasm --sym --c --output $CIRCOM_OUT_DIR
 echo "----------------------------------------------------------------------------------------"
 
 # We need to generate witness after compiling the circom file with the input.json
@@ -41,5 +41,5 @@ echo "--------------------------------------------------------------------------
 #
 # The witness file contains set of inputs, intermediate signals and output
 echo "🌟 Computing witness using WebAssembly"
-node $CIRCOM_OUT_JS/generate_witness.js $CIRCOM_OUT_JS/$CIRCOM_NAME.wasm $CIRCOM_PROJ_DIR/circom/input.json $CIRCOM_WITNESS
+node $CIRCOM_OUT_JS/generate_witness.js $CIRCOM_OUT_JS/$CIRCOM_NAME.wasm $CIRCOM_PROJ_DIR/circom/$CIRCOM_INPUT_NAME.json $CIRCOM_WITNESS
 echo "----------------------------------------------------------------------------------------"
