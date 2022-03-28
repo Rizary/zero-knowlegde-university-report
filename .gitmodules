@@ -7,3 +7,9 @@
 [submodule "tornado-nova"]
 	path = tornado-nova
 	url = git@github.com:tornadocash/tornado-nova.git
+[submodule "zksync"]
+	path = zksync
+	url = git@github.com:matter-labs/zksync.git
+[submodule "snarkyjs-workshop"]
+	path = snarkyjs-workshop
+	url = git@github.com:hadzija7/snarkyjs-workshop.git
