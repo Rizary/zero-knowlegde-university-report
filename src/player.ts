@@ -9,9 +9,9 @@ import {
 // Statistics of a character
 // Health 
 class CharStat extends SmartContract {
-    @state(Field) health: State<Field>; // healthendable skill points
-    @state(Field) mana: State<Field>; // manaack power
-    @state(Field) energy: State<Field>; // energyense power
+    @state(Field) health: State<Field>; // health points
+    @state(Field) mana: State<Field>; // mana point
+    @state(Field) energy: State<Field>; // energy point
 
     constructor(initialBalance: UInt64, address: PublicKey, init_health: Field, init_mana: Field, init_energy: Field) {
         super(address);
@@ -51,8 +51,8 @@ export async function run() {
 
     // Deploys the snapp
     await Mina.transaction(account1, async () => {
-        // account2 sends 1000000000 to the new snapp account
-        const amount = UInt64.fromNumber(1000000000);
+        // account2 sends 10000000000 to the new snapp account
+        const amount = UInt64.fromNumber(10000000000);
         const p = await Party.createSigned(account2);
         p.balance.subInPlace(amount);
 
@@ -61,30 +61,37 @@ export async function run() {
         .send()
         .wait();
 
+    // Printing initial state
     const b = await Mina.getAccount(snappPubkey);
     console.log('Init value: health -', b.snapp.appState[0].toString(), ', mana -', b.snapp.appState[1].toString(), ', energy -', b.snapp.appState[2].toString());
 
+    //  This is valid snapp update because we put assertion that Health = Mana + Energy
     await Mina.transaction(account1, async () => {
-        await snappInstance.update(new Field(200), new Field(170), new Field(30));
+        await snappInstance.update(new Field(300), new Field(250), new Field(50));
     })
         .send()
         .wait();
         console.log('Update state: health - 200, mana - 170, energy - 30')
 
+    //  This is invalid snapp update because we put assertion that Health = Mana + Energy.
+    //  But this update has unspent Mana (only 10) but the health is 1300
     await Mina.transaction(account1, async () => {
-        await snappInstance.update(new Field(1300), new Field(10), new Field(10));
+        await snappInstance.update(new Field(700), new Field(10), new Field(10));
     })
         .send()
         .wait()
-        .catch((e) => console.log('Failure test passes: health underhealthent'));
+        .catch((e) => console.log('Failure test passes: health under health'));
     
+    //  This is invalid snapp update because we put assertion that Health = Mana + Energy.
+    //  But this update has overspent Mana (only 10) but the health is 1300
     await Mina.transaction(account1, async () => {
-        await snappInstance.update(new Field(50), new Field(40), new Field(30));
+        await snappInstance.update(new Field(10), new Field(30), new Field(10));
     })
         .send()
         .wait()
-        .catch((e) => console.log('Failure test passes: health overhealthent'));
+        .catch((e) => console.log('Failure test passes: health over health'));
 
+    // We print the final state
     const a = await Mina.getAccount(snappPubkey);
     console.log('Final state values: health -', a.snapp.appState[0].toString(), ', mana -', a.snapp.appState[1].toString(), ', energy -', a.snapp.appState[2].toString());
 }
