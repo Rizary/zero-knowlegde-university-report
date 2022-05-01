@@ -1,0 +1,12 @@
+# Show available commands
+default:
+  @just --list
+
+# Show available commands
+list:
+  @just --list
+
+alias help := default
+
+deploy-harmony:
+  npx hardhat run scripts/deploy.js --network harmonyTestnet
