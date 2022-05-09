@@ -33,9 +33,14 @@ module.exports = {
   },
   networks: {
     harmonyTestnet: {
-      url: process.env.HARMONY_URL || "",
+      url: process.env.HARMONY_TEST_URL || "",
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    harmonyMainnet: {
+        url: process.env.HARMONY_MAIN_URL || "",
+        accounts:
+          process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
   },
   gasReporter: {

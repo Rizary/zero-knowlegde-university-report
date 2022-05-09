@@ -15,6 +15,7 @@ import "./MerkleTree.sol";
 contract Event is ERC721URIStorage, Ownable {
 
     string public evName;
+    address public evOwner;
     uint256 public startDate;
     uint256 public endDate;
     uint256 public available;
@@ -53,16 +54,16 @@ contract Event is ERC721URIStorage, Ownable {
     string memory _description,  
     string memory _location,
     uint supply, 
-    uint256 _ticketPrice
+    uint _ticketPrice
     ) ERC721(_name, "ZKEV") public {
 
         evName = _name;
         startDate = _start;
         endDate = _end;
-        ticketPrice = _ticketPrice;
+        ticketPrice = _ticketPrice * 27 / 1000;
         available = supply;
         description = _description;
-        address owner = _organizer;
+        evOwner = _organizer;
         location = _location;
         
         merkleTreeAddress = new MerkleTree(supply);
@@ -72,69 +73,95 @@ contract Event is ERC721URIStorage, Ownable {
     @dev allows user to purchase ticket for the event
     @param quantity total amount of ticket the user wishes to purchase maximum amount is 5
     */
-    function purchaseTicket(uint256 quantity) public payable {
+    function purchaseTicket(address receiverAddress, uint256 quantity) public payable {
         require(available  >= quantity, "not enough ticket quantity available!!!");
         require(msg.value >= SafeMath.mul(ticketPrice, quantity), "not enough money sent");
         uint256 newItemId;
         uint256[] memory allItemId;
         string memory stringSender = Strings.toHexString(uint(uint160(msg.sender)));
+        address payable minter = payable(receiverAddress);
+        newItemId = _tokenIds.current();
+        string memory json = Base64.encode(
+            bytes(
+                string(
+                    abi.encodePacked(
+                        '"event_name": "',
+                        evName,
+                        '", "description": "',
+                        description,
+                        '"}'
+                    )
+                )
+            )
+        );
+        string memory finalTokenUri = string(
+            abi.encodePacked("data:application/json;base64,", json)
+        );
+
+        _safeMint(minter, newItemId);
         
-        for(uint8 i = 0; i < quantity; i++) {
-            newItemId = _tokenIds.current();
-            string memory json = Base64.encode(
-                bytes(
-                    string(
-                        abi.encodePacked(
-                            '"event_name": "',
-                            evName,
-                            '", "description": "',
-                            description,
-                            '"}'
-                        )
+        // Update the URI!!!
+        _setTokenURI(newItemId, finalTokenUri);
+        
+        string memory info = Base64.encode(
+            bytes(
+                string(
+                    abi.encodePacked(
+                        '"receiver address": "',
+                        stringSender,
+                        '", "tokenId": "',
+                        Strings.toString(newItemId),
+                        '", "tokenURI": "',
+                        finalTokenUri,
+                        '"}'
                     )
                 )
-            );
+            )
+        );
 
-            // Just like before, prepend data:application/json;base64, to the data.
-            string memory finalTokenUri = string(
-                abi.encodePacked("data:application/json;base64,", json)
-            );
+        merkleTreeAddress.addData(info);
+        _tokenIds.increment();
+        available--;
+        // for(uint8 i = 0; i < quantity; i++) {
+        //     newItemId = _tokenIds.current();
+        //     string memory json = Base64.encode(
+        //         bytes(
+        //             string(
+        //                 abi.encodePacked(
+        //                     '"event_name": "',
+        //                     evName,
+        //                     '", "description": "',
+        //                     description,
+        //                     '"}'
+        //                 )
+        //             )
+        //         )
+        //     );
 
-            _safeMint(msg.sender, newItemId);
-            allItemId[i] = newItemId;
+        //     // Just like before, prepend data:application/json;base64, to the data.
+        //     string memory finalTokenUri = string(
+        //         abi.encodePacked("data:application/json;base64,", json)
+        //     );
 
-            // Update the URI!!!
-            _setTokenURI(newItemId, finalTokenUri);
+        //     _safeMint(minter, newItemId);
+        //     allItemId[i] = newItemId;
 
-            string memory info = Base64.encode(
-                bytes(
-                    string(
-                        abi.encodePacked(
-                            '"receiver address": "',
-                            stringSender,
-                            '", "tokenId": "',
-                            Strings.toString(newItemId),
-                            '", "tokenURI": "',
-                            finalTokenUri,
-                            '"}'
-                        )
-                    )
-                )
-            );
+        //     // Update the URI!!!
+        //     _setTokenURI(newItemId, finalTokenUri);
 
-            merkleTreeAddress.addData(info);
 
-            // Increment the counter for when the next NFT is minted.
-            _tokenIds.increment();
-            available--;
-            // console.logBytes(
-            //     "An NFT of event %s with ID %s has been minted to %s",
-            //     name,
-            //     Strings.toString(newItemId),
-            //     stringSender
-            // );
 
-        }
+        //     // Increment the counter for when the next NFT is minted.
+        //     _tokenIds.increment();
+        //     available--;
+        //     // console.logBytes(
+        //     //     "An NFT of event %s with ID %s has been minted to %s",
+        //     //     name,
+        //     //     Strings.toString(newItemId),
+        //     //     stringSender
+        //     // );
+
+        // }
 
         emit TicketPurchased(msg.sender, quantity, block.timestamp, allItemId);
     }
@@ -193,7 +220,7 @@ contract Event is ERC721URIStorage, Ownable {
 
     /**
     
-    @dev returns one for each ticket the user has incase the event is canceled
+    @dev returns one for each ticket the user has in case the event is canceled
     @param ticket id of the ticket to get refunds for
      */
     function getRefund(uint  ticket) public {
@@ -213,7 +240,13 @@ contract Event is ERC721URIStorage, Ownable {
     function isCanceled() public view returns(bool) {
         return canceled;
     }
-
+    
+    /**
+    @dev returns event identity
+    @return deployedEvents array of event address */
+    function getIdentity() external view returns(address, string memory, uint, uint, string memory, string memory, uint, uint) {
+        return (evOwner, evName, startDate, endDate, description, location, ticketPrice, available);
+    }
     
     /**
     
@@ -224,11 +257,11 @@ contract Event is ERC721URIStorage, Ownable {
         return merkleTreeAddress.getLeaves();
     }
 
-    function getTotalTicketMinted() public view returns (uint256) {
+    function getTotalTicketMinted() external view returns (uint256) {
         return _tokenIds.current();
     }
 
-    function getTotalTicketAvailables() public view returns (uint256) {
+    function getTotalTicketAvailables() external view returns (uint256) {
         return available;
     }
 
