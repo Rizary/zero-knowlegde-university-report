@@ -40,6 +40,6 @@ echo "--------------------------------------------------------------------------
 # taken from circom folder.
 #
 # The witness file contains set of inputs, intermediate signals and output
-# echo "🌟 Computing witness using WebAssembly"
-# node $CIRCOM_OUT_JS/generate_witness.js $CIRCOM_OUT_JS/$CIRCOM_NAME.wasm $CIRCOM_PROJ_DIR/circom/$CIRCOM_INPUT_NAME.json $CIRCOM_WITNESS
-# echo "----------------------------------------------------------------------------------------"
+echo "🌟 Computing witness using WebAssembly"
+node $CIRCOM_OUT_JS/generate_witness.js $CIRCOM_OUT_JS/$CIRCOM_NAME.wasm $CIRCOM_INPUT_NAME.json $CIRCOM_WITNESS
+echo "----------------------------------------------------------------------------------------"

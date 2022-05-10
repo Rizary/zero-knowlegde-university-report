@@ -10,14 +10,14 @@ if [[ -z "${CIRCOM_OUT_DIR}" ]]; then
 fi
 
 # Check if circom is compiled or not
-if [[ -z "${CIRCOM_ZKEY_AFT}" ]]; then
-  echo 'Error: CIRCOM_ZKEY_AFT is not set. Please run `just run-phase2`' >&2
-  exit 1
-fi
+# if [[ -z "${CIRCOM_ZKEY_AFT}" ]]; then
+#   echo 'Error: CIRCOM_ZKEY_AFT is not set. Please run `just run-phase2`' >&2
+#   exit 1
+# fi
 
 # Generating the proof
-echo "🌟 Generating proof using Groth16"
-snarkjs groth16 prove $CIRCOM_ZKEY_AFT $CIRCOM_WITNESS $CIRCOM_PROOF $CIRCOM_PUBLIC
+echo "🌟 Generating proof using Plonk"
+snarkjs plonk prove $CIRCOM_ZKEY_FINAL $CIRCOM_WITNESS $CIRCOM_PROOF $CIRCOM_PUBLIC
 echo "----------------------------------------------------------------------------------------"
 
 # Print the values of public inputs and outputs to the screen

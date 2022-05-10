@@ -22,15 +22,15 @@ fi
 
 # Phase 2 start with generating a `.zkey` file that will contain the proving and verification keys together with all phase 2 contributions.
 echo "🌟 Starting a new power of tau ceremony"
-snarkjs groth16 setup $CIRCOM_OUT_DIR/$CIRCOM_NAME.r1cs $CIRCOM_PTAU_FNAME_FINAL $CIRCOM_ZKEY
+snarkjs plonk setup $CIRCOM_OUT_DIR/$CIRCOM_NAME.r1cs $CIRCOM_PTAU_FNAME_FINAL $CIRCOM_ZKEY_FINAL
 echo "----------------------------------------------------------------------------------------"
 
 # Contribute to phase 2 of the ceremony using the generated zkey.
-echo "🌟 Contribute to phase 2 of the ceremony"
-snarkjs zkey contribute $CIRCOM_ZKEY $CIRCOM_ZKEY_AFT --name="1st Contributor Name" -v -e="another entropy"
-echo "----------------------------------------------------------------------------------------"
+# echo "🌟 Verify the final zkey"
+# snarkjs zkey verify $CIRCOM_OUT_DIR/$CIRCOM_NAME.r1cs $CIRCOM_PTAU_FNAME_FINAL $CIRCOM_ZKEY_FINAL
+# echo "----------------------------------------------------------------------------------------"
 
 # Exporting the verification key for proof step.
 echo "🌟 Exporting the verification key"
-snarkjs zkey export verificationkey $CIRCOM_ZKEY_AFT $VERIFICATION_ZKEY
+snarkjs zkey export verificationkey $CIRCOM_ZKEY_FINAL $VERIFICATION_ZKEY
 echo "----------------------------------------------------------------------------------------"

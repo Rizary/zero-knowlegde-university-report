@@ -14,7 +14,7 @@ export VERIFIER_SOLIDITY="$CIRCOM_OUT_DIR/verifier.sol"
 
 # Exporting verifier to solidity
 echo "🌟 Generating solidity verifier"
-snarkjs zkey export solidityverifier $CIRCOM_ZKEY_AFT $VERIFIER_SOLIDITY
+snarkjs zkey export solidityverifier $CIRCOM_ZKEY_FINAL $VERIFIER_SOLIDITY
 echo "----------------------------------------------------------------------------------------"
 
 # # Copy the verifier to contract folder

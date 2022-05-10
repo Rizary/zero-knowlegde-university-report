@@ -10,9 +10,9 @@ set dotenv-load
 # You can change CIRCOM_NAME and CIRCOM_PTAU_NUM for
 # specific filename and number of power of tau
 export CIRCOM_NAME := "merkletree"
-export CIRCOM_INPUT_NAME := "input_init"
+export CIRCOM_INPUT_NAME := "input"
 export CIRCOM_DIRNAME := "MerkleTree"
-export CIRCOM_PTAU_NUM := "15"
+export CIRCOM_PTAU_NUM := "16"
 export CIRCOM_PROJ_DIR := "./" + CIRCOM_DIRNAME
 export CIRCOM_OUT_DIR := CIRCOM_PROJ_DIR + "/circom_out"
 export CIRCOM_OUT_JS := CIRCOM_OUT_DIR + "/" + CIRCOM_NAME + "_js"
@@ -22,6 +22,7 @@ export CIRCOM_PTAU_FNAME_AFT := CIRCOM_OUT_DIR + "/pot" + CIRCOM_PTAU_NUM + "_00
 export CIRCOM_PTAU_FNAME_FINAL := CIRCOM_OUT_DIR + "/pot" + CIRCOM_PTAU_NUM + "_final.ptau"
 export CIRCOM_ZKEY:= CIRCOM_OUT_DIR + "/" + CIRCOM_NAME + "_0000.zkey"
 export CIRCOM_ZKEY_AFT:= CIRCOM_OUT_DIR + "/" + CIRCOM_NAME + "_0001.zkey"
+export CIRCOM_ZKEY_FINAL:= CIRCOM_OUT_DIR + "/" + CIRCOM_NAME + "_final.zkey"
 export VERIFICATION_ZKEY:= CIRCOM_OUT_DIR + "/" + "verification_key.json"
 export CIRCOM_PROOF:= CIRCOM_OUT_DIR + "/" + "proof.json"
 export CIRCOM_PUBLIC:= CIRCOM_OUT_DIR + "/" + "public.json"
@@ -46,7 +47,7 @@ list:
 alias help := default
 
 # run all command from compiling circom to generating proof and then verify it.
-all-circom: compile-circom run-ptau run-phase2 run-proof run-verify
+all-circom: compile-circom run-ptau run-phase2 run-proof run-verify export-solidity
 
 # run all command from compiling circom to phase2.
 build: compile-circom run-ptau run-phase2 export-solidity

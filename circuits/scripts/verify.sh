@@ -17,6 +17,11 @@ if [[ -z "${VERIFICATION_ZKEY}" ]]; then
 fi
 
 # Generating the proof
-echo "🌟 Generating proof using Groth16"
-snarkjs groth16 verify $VERIFICATION_ZKEY $CIRCOM_PUBLIC $CIRCOM_PROOF
+echo "🌟 Generating proof using Plonk"
+snarkjs plonk verify $VERIFICATION_ZKEY $CIRCOM_PUBLIC $CIRCOM_PROOF
+echo "----------------------------------------------------------------------------------------"
+
+# Generating the proof
+echo "🌟 Simulate verification call"
+snarkjs zkey export soliditycalldata $CIRCOM_PUBLIC $CIRCOM_PROOF
 echo "----------------------------------------------------------------------------------------"

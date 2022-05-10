@@ -42,4 +42,4 @@ template MerkleTree(len) {
     out <== hashes[hashesLength - 1].out;
 }
 
-component main {public [leaves]} = MerkleTree(8);
+component main {public [leaves]} = MerkleTree(16);
