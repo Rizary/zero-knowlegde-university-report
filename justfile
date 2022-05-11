@@ -11,5 +11,8 @@ alias help := default
 circuit:
   just circuits/build
   
-contract:
+contract-testnet:
   just contracts/deploy-harmony
+  
+contract-mainnet:
+  just contracts/deploy-harmony-mainnet
