@@ -27,10 +27,10 @@ contract EventFactory {
     @param _description description of the event 
     @param _location location of the event
     */
-    function createEvent(string memory  _name, uint _start, uint _end,  uint supply, uint _ticketPrice, string memory _description, string memory _location) public  {
+    function createEvent(string memory  _name, uint _start, uint _end,  uint supply, uint _ticketPrice, string memory _description, string memory _location, address verifierAddress) public  {
         require(!halted);
         address payable sender = payable(msg.sender);
-        Event newEvent = new Event(sender, _name, _start, _end,_description, _location, supply, _ticketPrice );
+        Event newEvent = new Event(sender, _name, _start, _end,_description, _location, supply, _ticketPrice, verifierAddress );
         deployedEvents.push(newEvent);
         emit eventCreated(newEvent, _name, _ticketPrice, _location, _start, _end, _name, _location);
     }

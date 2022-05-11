@@ -11,9 +11,16 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import "./MerkleTree.sol";
 
+interface IVerifier {
+    verifyProof(
+        bytes memory proof, 
+        uint[] memory pubSignals
+    ) external view returns (bool)
+}
+
 /** @title Event */
 contract Event is ERC721URIStorage, Ownable {
-
+    address public verifierAddr;
     string public evName;
     address public evOwner;
     uint256 public startDate;
@@ -31,7 +38,7 @@ contract Event is ERC721URIStorage, Ownable {
     MerkleTree public merkleTreeAddress;
    
     event TicketPurchased(address purchaser, uint256 quantity, uint date, uint256[] allItemId);
-    event TicketTransfered(address _from, address _to, uint256 _tokenId);
+    event TicketTransfered(address _from, address _to, uint256 _tokenIds);
     event PaymentCollected(address _event, address _organizer, uint256 _balance);
     event TicketRefunded(address _event, address _requestedBy, uint256 _tokenIds, uint256 _ticketPrice);
 
@@ -54,19 +61,21 @@ contract Event is ERC721URIStorage, Ownable {
     string memory _description,  
     string memory _location,
     uint supply, 
-    uint _ticketPrice
+    uint _ticketPrice,
+    address _verifierAddr
     ) ERC721(_name, "ZKEV") public {
 
         evName = _name;
         startDate = _start;
         endDate = _end;
-        ticketPrice = _ticketPrice * 27 / 1000;
+        ticketPrice = _ticketPrice;
         available = supply;
         description = _description;
         evOwner = _organizer;
         location = _location;
         
         merkleTreeAddress = new MerkleTree(supply);
+        verifierAddr = _verifierAddr;
     }
 
     /**
@@ -122,48 +131,8 @@ contract Event is ERC721URIStorage, Ownable {
         merkleTreeAddress.addData(info);
         _tokenIds.increment();
         available--;
-        // for(uint8 i = 0; i < quantity; i++) {
-        //     newItemId = _tokenIds.current();
-        //     string memory json = Base64.encode(
-        //         bytes(
-        //             string(
-        //                 abi.encodePacked(
-        //                     '"event_name": "',
-        //                     evName,
-        //                     '", "description": "',
-        //                     description,
-        //                     '"}'
-        //                 )
-        //             )
-        //         )
-        //     );
 
-        //     // Just like before, prepend data:application/json;base64, to the data.
-        //     string memory finalTokenUri = string(
-        //         abi.encodePacked("data:application/json;base64,", json)
-        //     );
-
-        //     _safeMint(minter, newItemId);
-        //     allItemId[i] = newItemId;
-
-        //     // Update the URI!!!
-        //     _setTokenURI(newItemId, finalTokenUri);
-
-
-
-        //     // Increment the counter for when the next NFT is minted.
-        //     _tokenIds.increment();
-        //     available--;
-        //     // console.logBytes(
-        //     //     "An NFT of event %s with ID %s has been minted to %s",
-        //     //     name,
-        //     //     Strings.toString(newItemId),
-        //     //     stringSender
-        //     // );
-
-        // }
-
-        emit TicketPurchased(msg.sender, quantity, block.timestamp, allItemId);
+        emit TicketPurchased(msg.sender, quantity, block.timestamp, newItemId);
     }
 
     /**
@@ -186,9 +155,9 @@ contract Event is ERC721URIStorage, Ownable {
     @param _tokenId id of the ticket to be validated
     @return x boolean value holding the result 
     */
-    function isTicketValid(address _owner, uint _tokenId) onlyOwner public returns(bool) {
-        if(ownerOf(_tokenId) == _owner) {
-            _burn(_tokenId);
+    function isTicketValid(address _owner, uint _tokenIds) onlyOwner public returns(bool) {
+        if(ownerOf(_tokenIds) == _owner) {
+            _burn(_tokenIds);
             return true;
         }  else {
             return false;
@@ -263,6 +232,21 @@ contract Event is ERC721URIStorage, Ownable {
 
     function getTotalTicketAvailables() external view returns (uint256) {
         return available;
+    }
+    
+    function verifyProof(
+        bytes memory proof, 
+        uint[] memory pubSignals
+    ) external view returns (bool) {
+        return IVerifier(verifierAddr).verifyProof(proof, pubSignals);
+    }
+    
+    function verifyTicketEvent(
+        bytes memory proof, 
+        uint[] memory pubSignals
+    ) public view returns (bool) {
+        require(verifyProof(proof, pubSignals), "Verify proof failed");
+        return true;
     }
 
 }

@@ -10,3 +10,6 @@ alias help := default
 
 deploy-harmony:
   npx hardhat run scripts/deploy.js --network harmonyTestnet
+
+deploy-harmony-mainnet:
+  npx hardhat run scripts/deploy.js --network harmonyMainnet
