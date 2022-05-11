@@ -1,13 +1,11 @@
 import { providers } from "ethers";
 import { useEffect, useState } from "react";
-import { groth16 } from 'snarkjs';
+import { plonk } from 'snarkjs';
 import {
     useAccount, useContract, useSigner
 } from "wagmi";
-import contractAddress from "../contract/address.json";
 import eventAbi from "../contract/Event.json";
 import networks from "../contract/networks.json";
-import zkEventVerifierAbi from "../contract/ZKEventVerifier.json";
 
 export default function TicketBox({ event }) {
     const signer = useSigner();
@@ -80,36 +78,21 @@ export default function TicketBox({ event }) {
             }
             
             const { proof: _proof, publicSignals: _publicSignals } =
-                await groth16.fullProve(
+                await plonk.fullProve(
                     { leaves },
                     "/zkproof/merkletree.wasm",
-                    "/zkproof/merkletree_0001.zkey"
+                    "/zkproof/merkletree_final.zkey"
                 );
-            console.log(_proof);
-            console.log(publicSignals);
-            setProof(JSON.stringify(_proof, null, 1));
-            setPublicSignals(JSON.stringify(_publicSignals, null, 1));
-    
-            const calldata = await groth16.exportSolidityCallData(
-                _proof,
-                _publicSignals
-            );
-            console.log(calldata);
             try {
-                const verifierConnectedContract = useContract({
-                    addressOrName: contractAddress.ZKEventVerifier,
-                    contractInterface: zkEventVerifierAbi.abi,
-                    signerOrProvider: signer.data,
-                });
-
-                const _veifierResult = await verifierConnectedContract.verifyProof(
-                    {calldata}
+                const _veifierResult = await eventContract.verifyProof(
+                    _proof,
+                    _publicSignals
                 );
                 setProofResult(_veifierResult);
-                // console.log(_veifierResult);
+                console.log(_veifierResult);
               } catch (err) {
                 setProofResult(false);
-                // console.log(err);
+                console.log(err);
             }
         };
         return (
@@ -122,28 +105,26 @@ export default function TicketBox({ event }) {
                         Verify Ticket
                     </button>
                 </form> 
-                <div className="grid grid-cols-1 place-items-center text-slate-100 gap-2">
+                <div className="p-4">
                 {proof && (
-                  <div className="grid grid-cols-1 place-items-center gap-5">
-                    <div>
-                      <span className="text-lg text-slate-100 font-medium mr-2">
+                <div>
+                    <div className="p-4">
+                      <span className="p-4 border-t border-b text-xs text-gray-700">
                         Proof:
                       </span>
-                      <span width={1 / 2}>{proof}</span>
+                      <span className="flex items-left mb-1" width={1 / 2}>{proof}</span>
                     </div>
-                    <div>
-                      <span className="text-lg text-slate-100 font-medium mr-2">
-                        Signals:
+                    <div className="p-4 border-t border-b text-xs text-gray-700">
+                      <span className="flex items-left mb-1">
+                        Signals: {publicSignals}
                       </span>
-                      <span>{publicSignals}</span>
                     </div>
-                    <div>
-                      <span className="text-lg text-slate-100 font-medium mr-2">
-                        Result:
+                    <div className="p-4 border-t border-b text-xs text-gray-700">
+                      <span className="flex items-left mb-12">
+                        Result: {proofResult.toString()}
                       </span>
-                      <span>{proofResult.toString()}</span>
                     </div>
-                  </div>
+                </div>
                 )}
               </div>
             </div>
