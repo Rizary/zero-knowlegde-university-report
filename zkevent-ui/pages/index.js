@@ -4,9 +4,11 @@ import {
     useAccount, useConnect, useContract, useDisconnect, useSigner
 } from "wagmi";
 import EventBox from "../components/events";
+import TicketBox from "../components/tickets";
 import contractAddress from "../contract/address.json";
 import eventFactoryAbi from "../contract/EventFactory.json";
 import networks from "../contract/networks.json";
+// import plonkVerifierAbi from "../contract/PlonkVerifier.json";
 
 export default function Home() {
     const signer = useSigner();
@@ -20,6 +22,12 @@ export default function Home() {
         contractInterface: eventFactoryAbi.abi,
         signerOrProvider: signer.data || provider,
     });
+    
+    // const plonkContract = useContract({
+    //     addressOrName: contractAddress.PlonkVerifier,
+    //     contractInterface: plonkVerifierAbi.abi,
+    //     signerOrProvider: signer.data || provider,
+    // });
 
 
     const {
@@ -115,7 +123,7 @@ export default function Home() {
                         Welcome {account.data?.address}
                     </div>
                     <div>Connected to {activeConnector.name}</div>
-                    <button onClick={disconnect}>Disconnect</button>
+                    <button className="bg-red-500 hover:bg-red-700 text-white uppercase text-sm font-semibold px-4 py-2 rounded" onClick={disconnect}>Disconnect</button>
                     <div>{renderEvents()}</div>
                 </div>
             )
@@ -141,16 +149,31 @@ export default function Home() {
     const createEventList = () => {
         return (events?.map((event, index) => {
             return (
-                <div className="flex flex-wrap justify-left items-center place-items-center gap-10" key={index}>
+                <div className="container mx-auto" key={index}>
+                    <div className="flex flex-wrap -mx-4">
                         <EventBox
                             event={event}
                         />
+                    </div>
                 </div>
             );
         }))
-
-        
     };
+    
+    const createTicketList = () => {
+        return (events?.map((event, index) => {
+            return (
+                <div className="container mx-auto" key={index}>
+                    <div className="flex flex-wrap -mx-4">
+                        <TicketBox
+                            event={event}
+                        />
+                    </div>
+                </div>
+            );
+        }))
+    };
+    
     const renderCreateEvent = () => {
         const contractWrite = async (event) => {
             event.preventDefault();
@@ -159,34 +182,52 @@ export default function Home() {
                 event.target.start.value,
                 event.target.end.value,
                 event.target.supply.value,
-                event.target.tp.value,
+                event.target.price.value,
                 event.target.desc.value,
                 event.target.loc.value,
+                contractAddress.PlonkVerifier,
             )
         };
         return (
-            <form onSubmit={contractWrite}>
-                <label htmlFor="name">Name</label>
-                <input id="name" name="name" type="text" autoComplete="name" required />
-                <label htmlFor="start">Start</label>
-                <input id="start" name="start" type="number" autoComplete="start" required />
-                <label htmlFor="end">End</label>
-                <input id="end" name="end" type="number" autoComplete="end" required />
-                <label htmlFor="supply">Supply</label>
-                <input id="supply" name="supply" type="number" required />
-                <label htmlFor="tp">Ticket Price</label>
-                <input id="tp" name="tp" type="number" required min="0" step="any"/>
-                <label htmlFor="desc">Description</label>
-                <input id="desc" name="desc" type="text" autoComplete="desc" required />
-                <label htmlFor="loc">Location</label>
-                <input id="loc" name="loc" type="text" autoComplete="loc" required />
-                <button
-                    className="text-lg font-medium rounded-md px-5 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500"
-                    type="submit"
-                >
-                    Create Event
-                </button>
-            </form> 
+            <div className="w-full bg-white rounded shadow-lg p-8 m-4 md:max-w-sm md:mx-auto">
+                <span className="block w-full text-xl uppercase font-bold mb-4">Create Event</span> 
+                <form className="mb-4" onSubmit={contractWrite}>
+                    <div className="mb-4 md:w-full">
+                        <label className="block text-xs mb-1" htmlFor="name">Name</label>
+                        <input className="w-full border rounded p-2 outline-none focus:shadow-outline" id="name" name="name" type="text" autoComplete="name" placeholder="Event Name" required />
+                    </div>
+                    <div className="mb-4 md:w-full">
+                        <label className="block text-xs mb-1" htmlFor="start">Start</label>
+                        <input className="w-full border rounded p-2 outline-none focus:shadow-outline" id="start" name="start" type="number" autoComplete="start" placeholder="Event Start" required />
+                    </div>
+                    <div className="mb-4 md:w-full">
+                        <label className="block text-xs mb-1" htmlFor="end">End</label>
+                        <input className="w-full border rounded p-2 outline-none focus:shadow-outline" id="end" name="end" type="number" autoComplete="end" placeholder="Event End" required />
+                    </div>
+                    <div className="mb-4 md:w-full">
+                        <label className="block text-xs mb-1" htmlFor="supply">Supply</label>
+                        <input className="w-full border rounded p-2 outline-none focus:shadow-outline" id="supply" name="supply" type="number" placeholder="Ticket Supply" required />
+                    </div>
+                    <div className="mb-4 md:w-full">
+                        <label className="block text-xs mb-1" htmlFor="price">Ticket Price</label>
+                        <input className="w-full border rounded p-2 outline-none focus:shadow-outline" id="price" name="price" type="number" required min="0" step="any" placeholder="0"/>
+                    </div>
+                    <div className="mb-4 md:w-full">
+                        <label className="block text-xs mb-1" htmlFor="desc">Description</label>
+                        <input className="w-full border rounded p-2 outline-none focus:shadow-outline" id="desc" name="desc" type="text" autoComplete="desc" placeholder="Description" required />
+                    </div>
+                    <div className="mb-4 md:w-full">
+                        <label className="block text-xs mb-1" htmlFor="loc">Location</label>
+                        <input className="w-full border rounded p-2 outline-none focus:shadow-outline" id="loc" name="loc" type="text" autoComplete="loc" placeholder="Location" required />
+                    </div>
+                    <button
+                        className="bg-green-500 hover:bg-green-700 text-white uppercase text-sm font-semibold px-4 py-2 rounded"
+                        type="submit"
+                    >
+                        Create Event
+                    </button>
+                </form>
+            </div>
         );
     }
     
@@ -197,22 +238,30 @@ export default function Home() {
                 Your Event:
             </h1>
             <div>{getEventList()}</div>
-            <div>
+            <div className="py-4">
+                <h1 className={"text-2xl font-bold underline"}>
+                    List Events:
+                </h1>
+                {createEventList()}
             </div>
             <div>
-                  Events:
-                  {createEventList()}
-            </div>
-            <div>
-                {renderCreateEvent()}
+                <div className="flex items-center h-screen w-full">
+                    {renderCreateEvent()}
+                </div>
             </div> 
+            <div className="py-4">
+                <h1 className={"text-2xl font-bold underline"}>
+                    My Tickets:
+                </h1>
+                {createTicketList()}
+            </div>
         </div>
       )
     } 
 
     return (
-        <div>
-        <main >
+        <div className="antialiased bg-gray-200 text-gray-900 font-sans p-6">
+        <main>
             <h1 className={"text-3xl font-bold underline"}>
             Welcome to ZKEvent
             </h1>

@@ -16,34 +16,71 @@ export default function EventBox({ event }) {
         contractInterface: eventAbi.abi,
         signerOrProvider: signer.data || provider,
     });
-    const [ticketPrice, updateticketPrice] = useState();
+    const [isBusy, setBusy] = useState(true)
+    const [eventIdentity, updateEventIdentity] = useState();
     useEffect(() => {
-        const getTicket = async () => {
-            const ticket = await eventContract.data?.ticketPrice;
-            updateticketPrice(ticket);
+        const getEventIdentity = async () => {
+            const result = await eventContract.getIdentity();
+            const {
+                0: owner,
+                1: name,
+                2: start,
+                3: end,
+                4: desc,
+                5: loc,
+                6: tp,
+                7: avail,
+            } = result;
+            updateEventIdentity({
+                "owner": owner,
+                "name": name,
+                "start": start.toNumber(),
+                "end": end.toNumber(),
+                "description": desc,
+                "location": loc,
+                "price": tp.toNumber(),
+                "available": avail.toNumber()
+            });
+            result["0"] === undefined ? setBusy(true) : setBusy(false);
         }
-        getTicket();
+        getEventIdentity();
     }, []);
     
+    const [ticketMinted, updateTicketMinted] = useState(0);
+    useEffect(() => {
+        const getTicketMinted = async () => {
+            const result = await eventContract.getTotalTicketMinted();
+            updateTicketMinted(result.toNumber());
+        }
+        getTicketMinted();
+    }, []);
+    
+    const [ticketAvailable, updateTicketAvailable] = useState(0);
+    useEffect(() => {
+        const getTicketAvailable = async () => {
+            const result = await eventContract.getTotalTicketAvailables();
+            updateTicketAvailable(result.toNumber());
+        }
+        getTicketAvailable();
+        
+    }, []);
+
     const renderPurchaseTicket = () => {
         const contractWrite = async (event) => {
-            const total = event.target.ticket.value * ticketPrice;
-            console.log(total);
             event.preventDefault();
             eventContract.purchaseTicket(
-                event.target.ticket.value,
+                account.data?.address,
+                1,
                 {
                     "from": account.data?.address,
-                    "value": "1000"
+                    "value": eventIdentity["price"],
                 },
             )
         };
         return (
             <form onSubmit={contractWrite}>
-                <label htmlFor="ticket">Ticket number</label>
-                <input id="ticket" name="ticket" type="number" autoComplete="0" required />
                 <button
-                    className="text-lg font-medium rounded-md px-5 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500"
+                    className="bg-blue-500 hover:bg-blue-700 text-white uppercase text-sm font-semibold px-4 py-2 rounded"
                     type="submit"
                 >
                     Purchase Ticket
@@ -52,13 +89,41 @@ export default function EventBox({ event }) {
         );
     }
 
-
     return (
-        <div>
-            <h1 className={"text-2xl font-bold underline"}>
-                Contract address: {eventContract.address}
-            </h1>
-            <div>{renderPurchaseTicket()}</div>
+        <div className="w-full sm:w-1/2 md:w-1/2 xl:w-1/4 p-4">
+            {isBusy ? (
+                <h2 className="t-2 mb-2  font-bold">
+                    loading...
+                </h2>
+              ):(<div className="c-card block bg-white shadow-md hover:shadow-xl rounded-lg overflow-hidden">
+                <div className="p-4">
+                    <span className="inline-block px-2 py-1 leading-none bg-orange-200 text-orange-800 rounded-full font-semibold uppercase tracking-wide text-xs"> Event </span>
+                </div>
+                <div className="p-4">  
+                    <h2 className="t-2 mb-2  font-bold">
+                        {eventIdentity["name"]}
+                    </h2>
+                    <p className="text-sm">
+                        {eventIdentity["description"]}
+                    </p>
+                    <div className="mt-3 flex items-center">
+                        <span className="text-sm font-semibold">Price</span>&nbsp;<span className="font-bold text-xl">{eventIdentity["price"]}</span>
+                    </div>
+                    <div className="mt-3 flex items-center">
+                        <span className="text-sm font-semibold">Address:</span>
+                    </div> 
+                    <div className="mt-3 flex items-center">
+                        <span className="text-sm">{eventContract.address}</span>
+                    </div>
+                </div>
+                <div className="p-4 border-t border-b text-xs text-gray-700">
+                <span className="flex items-center mb-1">Minted: {ticketMinted}</span>
+                <span className="flex items-center">Available: {ticketAvailable}</span>
+                </div>
+                <div className="p-4 flex items-center text-sm text-gray-600">
+                    {renderPurchaseTicket()}
+                </div>
+            </div>)}
         </div>
     )
 }
