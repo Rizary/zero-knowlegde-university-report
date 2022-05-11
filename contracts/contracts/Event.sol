@@ -12,10 +12,10 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./MerkleTree.sol";
 
 interface IVerifier {
-    verifyProof(
+    function verifyProof(
         bytes memory proof, 
         uint[] memory pubSignals
-    ) external view returns (bool)
+    ) external view returns (bool);
 }
 
 /** @title Event */
@@ -37,7 +37,7 @@ contract Event is ERC721URIStorage, Ownable {
     
     MerkleTree public merkleTreeAddress;
    
-    event TicketPurchased(address purchaser, uint256 quantity, uint date, uint256[] allItemId);
+    event TicketPurchased(address purchaser, uint256 quantity, uint date, uint256 newItemId);
     event TicketTransfered(address _from, address _to, uint256 _tokenIds);
     event PaymentCollected(address _event, address _organizer, uint256 _balance);
     event TicketRefunded(address _event, address _requestedBy, uint256 _tokenIds, uint256 _ticketPrice);
@@ -149,10 +149,9 @@ contract Event is ERC721URIStorage, Ownable {
 
 
     /**
-    
     @dev validated if a given ticket id is owned by the given user 
     @param _owner address of the owner of ticket to be validated
-    @param _tokenId id of the ticket to be validated
+    @param _tokenIds id of the ticket to be validated
     @return x boolean value holding the result 
     */
     function isTicketValid(address _owner, uint _tokenIds) onlyOwner public returns(bool) {
@@ -237,7 +236,7 @@ contract Event is ERC721URIStorage, Ownable {
     function verifyProof(
         bytes memory proof, 
         uint[] memory pubSignals
-    ) external view returns (bool) {
+    ) public view returns (bool) {
         return IVerifier(verifierAddr).verifyProof(proof, pubSignals);
     }
     

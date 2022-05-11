@@ -7,16 +7,16 @@ const hre = require("hardhat");
 
 async function main() {
   
-    // --------- ZKEventVerifier ---------------------
+    // --------- PlonkVerifier ---------------------
 
-    const contractFactoryZKEventVerifier = await hre.ethers.getContractFactory(
-        "ZKEventVerifier"
+    const contractFactoryPlonkVerifier = await hre.ethers.getContractFactory(
+        "PlonkVerifier"
     );
-    const contractZKEventVerifier = await contractFactoryZKEventVerifier.deploy();
-    await contractZKEventVerifier.deployed();
+    const contractPlonkVerifier = await contractFactoryPlonkVerifier.deploy();
+    await contractPlonkVerifier.deployed();
     console.log(
-        "ZKEventVerifier Contract deployed to:",
-        contractZKEventVerifier.address
+        "PlonkVerifier Contract deployed to:",
+        contractPlonkVerifier.address
     );
     
     // --------- EventFactory ---------------------
