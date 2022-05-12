@@ -50,7 +50,7 @@ alias help := default
 all-circom: compile-circom run-ptau run-phase2 run-proof run-verify export-solidity
 
 # run all command from compiling circom to phase2.
-build: compile-circom run-ptau run-phase2 export-solidity
+build: compile-circom run-ptau run-phase2 run-proof run-verify
 
 # run all command after cleanup all output
 all-circom-cleaned: clean-all all-circom 

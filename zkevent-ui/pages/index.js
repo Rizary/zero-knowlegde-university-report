@@ -206,7 +206,7 @@ export default function Home() {
                     </div>
                     <div className="mb-4 md:w-full">
                         <label className="block text-xs mb-1" htmlFor="supply">Supply</label>
-                        <input className="w-full border rounded p-2 outline-none focus:shadow-outline" id="supply" name="supply" type="number" placeholder="Ticket Supply" required />
+                        <input className="w-full border rounded p-2 outline-none focus:shadow-outline" id="supply" name="supply" type="number" placeholder="Ticket Supply" required max="16"/>
                     </div>
                     <div className="mb-4 md:w-full">
                         <label className="block text-xs mb-1" htmlFor="price">Ticket Price</label>

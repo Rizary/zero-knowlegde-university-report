@@ -1,4 +1,5 @@
 import { providers } from "ethers";
+import { utils } from "ffjavascript";
 import { useEffect, useState } from "react";
 import { plonk } from 'snarkjs';
 import {
@@ -9,6 +10,7 @@ import networks from "../contract/networks.json";
 
 export default function TicketBox({ event }) {
     const signer = useSigner();
+    const unstringifyBigInts = utils.unstringifyBigInts;
 
     const provider = providers.getDefaultProvider(networks["HarmonyTestNet"].rpcUrls[0])
         
@@ -83,10 +85,26 @@ export default function TicketBox({ event }) {
                     "/zkproof/merkletree.wasm",
                     "/zkproof/merkletree_final.zkey"
                 );
+
+            const calldata = await plonk.exportSolidityCallData(
+                unstringifyBigInts(_proof),
+                unstringifyBigInts(_publicSignals)
+            );
+            const argv = calldata
+                .replace(/["[\]\s]/g, "")
+                .split(",");
+            const [proof, ...rest] = argv;
+            const publicSignals = rest.map((x) => BigInt(x).toString());
+                // .replace(/["[\]\s]/g, "")
+                // .split(",")
+                // .map((x) => BigInt(x).toString());
+            console.log(proof);
+            console.log(publicSignals);
+
             try {
-                const _veifierResult = await eventContract.verifyProof(
-                    _proof,
-                    _publicSignals
+                const _veifierResult = await eventContract.verifyTicketEvent(
+                    proof,
+                    publicSignals,
                 );
                 setProofResult(_veifierResult);
                 console.log(_veifierResult);
