@@ -1,20 +1,19 @@
-import { providers } from "ethers";
+import { BigNumber } from "ethers";
 import { useEffect, useState } from "react";
 import {
-    useAccount, useContract, useSigner
+    useAccount, useContract, useProvider, useSigner
 } from "wagmi";
 import eventAbi from "../contract/Event.json";
-import networks from "../contract/networks.json";
 export default function EventBox({ event }) {
-    const signer = useSigner();
+    const { data: accountData } = useAccount();
+    const provider = useProvider();
+    const { data: signer, isSuccess } = useSigner();
 
-    const provider = providers.getDefaultProvider(networks["HarmonyTestNet"].rpcUrls[0])
-        
     const account = useAccount();
     const eventContract = useContract({
         addressOrName: event,
         contractInterface: eventAbi.abi,
-        signerOrProvider: signer.data || provider,
+        signerOrProvider: signer || provider,
     });
     const [isBusy, setBusy] = useState(true)
     const [eventIdentity, updateEventIdentity] = useState();
@@ -43,7 +42,9 @@ export default function EventBox({ event }) {
             });
             result["0"] === undefined ? setBusy(true) : setBusy(false);
         }
-        getEventIdentity();
+        if(isSuccess) {
+            getEventIdentity();
+        }
     }, []);
     
     const [ticketMinted, updateTicketMinted] = useState(0);
@@ -52,7 +53,7 @@ export default function EventBox({ event }) {
             const result = await eventContract.getTotalTicketMinted();
             updateTicketMinted(result.toNumber());
         }
-        getTicketMinted();
+        if(isSuccess) { getTicketMinted() };
     }, []);
     
     const [ticketAvailable, updateTicketAvailable] = useState(0);
@@ -61,18 +62,17 @@ export default function EventBox({ event }) {
             const result = await eventContract.getTotalTicketAvailables();
             updateTicketAvailable(result.toNumber());
         }
-        getTicketAvailable();
-        
+        if (isSuccess) { getTicketAvailable() };
     }, []);
 
     const renderPurchaseTicket = () => {
         const contractWrite = async (event) => {
             event.preventDefault();
             eventContract.purchaseTicket(
-                account.data?.address,
-                1,
+                accountData.address,
+                BigNumber.from(1),
                 {
-                    "from": account.data?.address,
+                    "from": accountData.address,
                     "value": eventIdentity["price"],
                 },
             )

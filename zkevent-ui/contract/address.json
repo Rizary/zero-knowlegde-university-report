@@ -1,4 +1,5 @@
 {
-    "PlonkVerifier": "0x10ac9b93c49872032c6b022a0DC78DfEF0E76848",
-    "EventFactory": "0xC82e0499E10c48Aba9d5C1701e64e232C9f6A3Cc"
+    "PlonkVerifier": "0x714263bC973b8a8cA2201dd8416C501032e2401b",
+    "EventFactory": "0x99d93db01282090855eFbAB6c3c8EAb012F8783B",
+    "PoseidonHasher": "0x92921378044Dd8D9E9CD9dC3C18aaCa03625Ccf9"
 }

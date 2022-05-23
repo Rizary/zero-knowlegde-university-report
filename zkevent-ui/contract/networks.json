@@ -1,6 +1,6 @@
 {
     "HarmonyTestNet": {
-        "chainId": "1666700000",
+        "chainId": 1666700000,
         "chainName": "Harmony Testnet Shard 0",
         "rpcUrls": ["https://api.s0.b.hmny.io"],
         "nativeCurrency": {
@@ -9,7 +9,7 @@
         "blockExplorerUrls": ["https://explorer.pops.one/"]
       },
       "HarmonyMainNet": {
-        "chainId": "1666600000",
+        "chainId": 1666600000,
         "chainName": "Harmony Mainnet Shard 0",
         "rpcUrls": ["https://api.harmony.one"],
         "nativeCurrency": {

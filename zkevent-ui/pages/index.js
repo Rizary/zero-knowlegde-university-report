@@ -1,46 +1,43 @@
-import { providers } from "ethers";
 import { useEffect, useState } from "react";
-import {
-    useAccount, useConnect, useContract, useDisconnect, useSigner
-} from "wagmi";
+import { useAccount, useConnect, useContract, useDisconnect, useProvider, useSigner } from "wagmi";
 import EventBox from "../components/events";
 import TicketBox from "../components/tickets";
 import contractAddress from "../contract/address.json";
 import eventFactoryAbi from "../contract/EventFactory.json";
-import networks from "../contract/networks.json";
-// import plonkVerifierAbi from "../contract/PlonkVerifier.json";
+// import networks from "../contract/networks.json";
 
 export default function Home() {
-    const signer = useSigner();
+    // const network = networks["HarmonyTestNet"];
+    // const provider = new providers.JsonRpcProvider(
+    //     network.rpcUrls[0],
+    //     {
+    //         chainId: network.chainId,
+    //         name: network.name
+    //     });
+    // const account = provider.getSigner();
+    // const [account, updateAccount] = useState();
+    // useEffect(() => {
+    //     const getAccount = async () => {
+    //         const acc = await useAccount();
+    //         updateAccount(acc);
+    //     }
+    //     getAccount();
+    // }, []);
+    const { data: connectData, error, connect, connectors, isConnected, activeConnector } = useConnect();
 
-    const provider = providers.getDefaultProvider(networks["HarmonyTestNet"].rpcUrls[0])
-        
-    const account = useAccount();
-
+    const { data: accountData } = useAccount();
+    const { disconnect } = useDisconnect()
+    const provider = useProvider();
+    const { data: signer, isSuccess } = useSigner();
+  
     const mainContract = useContract({
         addressOrName: contractAddress.EventFactory,
         contractInterface: eventFactoryAbi.abi,
-        signerOrProvider: signer.data || provider,
+        signerOrProvider: signer || provider,
     });
-    
-    // const plonkContract = useContract({
-    //     addressOrName: contractAddress.PlonkVerifier,
-    //     contractInterface: plonkVerifierAbi.abi,
-    //     signerOrProvider: signer.data || provider,
-    // });
 
-
-    const {
-        activeConnector,
-        connect,
-        connectors,
-        isConnected,
-    } = useConnect()
-
-    const { disconnect } = useDisconnect()
-    
     const renderConnectWallet = () => {
-        if (!account.data?.address) {
+        if (!accountData?.address) {
             return (
                 <button
                     className="text-lg font-medium rounded-md px-5 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500"
@@ -54,73 +51,13 @@ export default function Home() {
         }
     };    
 
-    const [events, updateEvent] = useState();
-    useEffect(() => {
-        const getEventD = async () => {
-            const allEvent = await mainContract.getDeployedEvents();
-            updateEvent(allEvent);
-        }
-        getEventD();
-    }, []);
-    
-    // TODO: ethers didn't support harmony hmy_getlogs
-    // const EventCreated = mainContract.interface.getEvent("eventCreated(address, string, uint, string, uint, uint, string, string)");
-    
-    // const [eventsCreated, updateEventsCreated] = useState([]);
-    // useEffect(() => {
-    //     const getEventC = async () => {
-    //         const logs = await provider.getLogs({
-    //             method: "hmy_getlogs",
-    //             fromBlock: 0,
-    //             toBlock: "latest",
-    //             address: mainContract.address,
-    //             topics: EventCreated.topics
-    //         });
-    //         for (const log of logs)
-    //         {
-    //             const logData = EventCreated.parse(log.topics, log.data);
-        
-    //             console.log(logData);
-        
-    //         //do something with logData which includes the event arguments are properties. eg logData.fromAddress, logData.toAddress and logData.amount
-    //         }
-    //         // updateEvent(allEvent);
-    //     }
-    //     getEventC();
-    // }, []);
-    // // filter: { _filterName: "", _filterLocation: "" },
-    // //   fromBlock: 0,
-    // //   toBlock: "latest"
-    // const handleEventsCreated =
-    //     (
-    //         data,
-    //     ) => {
-    //         console.log(name);
-    //         updateEventsCreated(old => [...old, {
-    //             "address": addr,
-    //             "name": name,
-    //             "price": tp,
-    //             "location": location,
-    //             "startDate": start,
-    //             "endDate": end,
-    //         }]);
-    //     };
-    // useContractEvent(
-    //     {
-    //         addressOrName: contractAddress.EventFactory,
-    //         contractInterface: eventFactoryAbi.abi,
-    //         signerOrProvider: signer.data || provider,
-    //     },
-    //     'eventCreated',
-    //     handleEventsCreated,
-    // );
-
+    const [isBusy, setBusy] = useState(true)
     const renderAccount = () => {
         if (isConnected) {
             return (
                 <div>
                     <div className="text-lg">
-                        Welcome {account.data?.address}
+                        Welcome {accountData?.address}
                     </div>
                     <div>Connected to {activeConnector.name}</div>
                     <button className="bg-red-500 hover:bg-red-700 text-white uppercase text-sm font-semibold px-4 py-2 rounded" onClick={disconnect}>Disconnect</button>
@@ -141,13 +78,13 @@ export default function Home() {
     const getEventList = () => {
         return (
             <div>
-                Length of event: {events?.length}
+                Length of event: {isBusy? 0 : events.length}
             </div>
         )
     };
         
     const createEventList = () => {
-        return (events?.map((event, index) => {
+        return (isBusy? <div></div> : events.map((event, index) => {
             return (
                 <div className="container mx-auto" key={index}>
                     <div className="flex flex-wrap -mx-4">
@@ -161,7 +98,7 @@ export default function Home() {
     };
     
     const createTicketList = () => {
-        return (events?.map((event, index) => {
+        return (isBusy? <div></div> : events.map((event, index) => {
             return (
                 <div className="container mx-auto" key={index}>
                     <div className="flex flex-wrap -mx-4">
@@ -181,11 +118,12 @@ export default function Home() {
                 event.target.name.value,
                 event.target.start.value,
                 event.target.end.value,
-                event.target.supply.value,
+                30,
                 event.target.price.value,
                 event.target.desc.value,
                 event.target.loc.value,
                 contractAddress.PlonkVerifier,
+                contractAddress.PoseidonHasher
             )
         };
         return (
@@ -203,10 +141,6 @@ export default function Home() {
                     <div className="mb-4 md:w-full">
                         <label className="block text-xs mb-1" htmlFor="end">End</label>
                         <input className="w-full border rounded p-2 outline-none focus:shadow-outline" id="end" name="end" type="number" autoComplete="end" placeholder="Event End" required />
-                    </div>
-                    <div className="mb-4 md:w-full">
-                        <label className="block text-xs mb-1" htmlFor="supply">Supply</label>
-                        <input className="w-full border rounded p-2 outline-none focus:shadow-outline" id="supply" name="supply" type="number" placeholder="Ticket Supply" required max="16"/>
                     </div>
                     <div className="mb-4 md:w-full">
                         <label className="block text-xs mb-1" htmlFor="price">Ticket Price</label>
@@ -231,6 +165,18 @@ export default function Home() {
         );
     }
     
+    const [events, updateEvent] = useState([]);
+    useEffect(() => {
+        const getEventD = async () => {
+            const allEvent = await mainContract.getDeployedEvents();
+            updateEvent(allEvent);
+            allEvent == undefined ? setBusy(true) : setBusy(false);
+        }
+        // if (isSuccess) {
+        getEventD();
+        // }
+    }, []);
+
     const renderEvents = () => {
       return (
         <div>
