@@ -114,25 +114,7 @@ export default function TicketBox({ event }) {
                 hashFunction: (left, right) => poseidon.hash(BigNumber.from(left), BigNumber.from(right)).toString(),
                 zeroElement: ZERO_ELEMENT
             })
-            console.log("index number: ", index);
             const path = tree.proof(leaves[index]);
-            console.log(path);
-
-            // const wc = require("../public/zkproof/witness_calculator.js");
-            // console.log(data["result"]);
-            // const witnessCalculator = await wc(data["result"]);
-            // const buffer = await witnessCalculator.calculateWTNSBin({
-            //     "leaf": 4,
-            //     "root": tree.root,
-            //     "pathElements": path.pathElements,
-            //     "pathIndices": path.pathIndices
-            // });
-            // fs.writeFileSync(WITNESS_FILE, buffer);
-            // const { proof: _proof, publicSignals: _publicSignals } =
-            //     await plonk.prove(
-            //         "/zkproof/merkleproof_final.zkey",
-            //         "/zkproof/witness.wtns"
-            //     );
             const { proof: _proof, publicSignals: _publicSignals } =
                 await plonk.fullProve(
                     {
@@ -162,7 +144,6 @@ export default function TicketBox({ event }) {
                 );
                 setIsProved(true);
                 setProofResult(_veifierResult);
-                console.log(_veifierResult);
               } catch (err) {
                 setProofResult(false);
                 setIsProved(false)
@@ -182,20 +163,9 @@ export default function TicketBox({ event }) {
                 <div className="p-4">
                 {isProved ?  (
                 <div>
-                    <div className="p-4">
-                      <span className="p-4 border-t border-b text-xs text-gray-700">
-                        Proof: {proof}
-                      </span>
-                      <span className="flex items-left mb-1" width={1 / 2}>{proof}</span>
-                    </div>
-                    <div className="p-4 border-t border-b text-xs text-gray-700">
-                      <span className="flex items-left mb-1">
-                        Signals: {publicSignals}
-                      </span>
-                    </div>
                     <div className="p-4 border-t border-b text-xs text-gray-700">
                       <span className="flex items-left mb-12">
-                        Result: {proofResult.toString()}
+                        Result: {(proofResult ? "Verified" : "UnVerified") }
                       </span>
                     </div>
                 </div>

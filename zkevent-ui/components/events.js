@@ -61,9 +61,9 @@ export default function EventBox({ event }) {
     useEffect(() => {
         const getTicketAvailable = async () => {
             const result = (await eventContract.getTotalTicketAvailables()).toNumber();
-            updateTicketAvailable(ticketAvalaiable => ticketAvalaiable > result ? result : ticketAvailable);
+            updateTicketAvailable(ta => ta > result ? result : ticketAvailable);
         }
-        if (isSuccess) { getTicketAvailable() };
+        getTicketAvailable();
     }, [ticketAvailable]);
 
     const renderPurchaseTicket = () => {
