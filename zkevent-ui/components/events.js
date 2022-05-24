@@ -20,7 +20,8 @@ export default function EventBox({ event }) {
     const [eventIdentity, updateEventIdentity] = useState();
     useEffect(() => {
         const getEventIdentity = async () => {
-            const result = await eventContract.getIdentity();
+            try {
+                const result = await eventContract.getIdentity();
             const {
                 0: owner,
                 1: name,
@@ -41,30 +42,39 @@ export default function EventBox({ event }) {
                 "price": tp.toNumber(),
                 "available": avail.toNumber()
             });
-            result["0"] === undefined ? setBusy(true) : setBusy(false);
+                result["0"] === undefined ? setBusy(true) : setBusy(false);
+            } catch (err) {
+                console.log(err);
+            }
         }
-        if(isSuccess) {
-            getEventIdentity();
-        }
+        getEventIdentity();
     }, []);
     
     const [ticketMinted, updateTicketMinted] = useState(0);
     useEffect(() => {
         const getTicketMinted = async () => {
-            const result = (await eventContract.getTotalTicketMinted()).toNumber();
-            updateTicketMinted(ticketMinted => ticketMinted < result ? result : ticketMinted);
+            try {
+                const result = await eventContract.getTotalTicketMinted();
+                updateTicketMinted(result.toNumber());
+            } catch (err) {
+                console.log(err);
+            }
         }
-        if(isSuccess) { getTicketMinted() };
-    }, [ticketMinted]);
+        getTicketMinted() ;
+    }, []);
     
     const [ticketAvailable, updateTicketAvailable] = useState(0);
     useEffect(() => {
         const getTicketAvailable = async () => {
-            const result = (await eventContract.getTotalTicketAvailables()).toNumber();
-            updateTicketAvailable(ta => ta > result ? result : ticketAvailable);
+            try {
+                const result = await eventContract.getTotalTicketAvailables();
+                updateTicketAvailable(result.toNumber());
+            } catch (err) {
+                console.log(err);
+            }
         }
         getTicketAvailable();
-    }, [ticketAvailable]);
+    }, []);
 
     const renderPurchaseTicket = () => {
         const contractWrite = async (event) => {
