@@ -15,12 +15,12 @@ export default function Home() {
     // const provider = useProvider();
     const provider = providers.getDefaultProvider(networks["HarmonyTestNet"].rpcUrls[0])
     
-    const { data: signer} = useSigner();
+    const signer  = useSigner();
   
     const mainContract = useContract({
         addressOrName: contractAddress.EventFactory,
         contractInterface: eventFactoryAbi.abi,
-        signerOrProvider: signer || provider,
+        signerOrProvider: signer?.data || provider,
     });
 
     const renderConnectWallet = () => {
@@ -161,7 +161,9 @@ export default function Home() {
 
             allEvent == undefined ? setBusy(true) : setBusy(false);
         }
-        getEventD();
+        if(isConnected && !signer.isLoading){
+            getEventD();
+        }
     }, [events]);
 
     const renderEvents = () => {
