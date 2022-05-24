@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.13;
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -37,7 +37,7 @@ contract Event is ERC721URIStorage, Ownable {
     
     MerkleTree public merkleTreeAddress;
    
-    event TicketPurchased(address purchaser, uint256 quantity, uint date, uint256 newItemId);
+    event TicketPurchased(address purchaser, uint date, uint32 index, uint256 info, uint256 newItemId);
     event TicketTransfered(address _from, address _to, uint256 _tokenIds);
     event PaymentCollected(address _event, address _organizer, uint256 _balance);
     event TicketRefunded(address _event, address _requestedBy, uint256 _tokenIds, uint256 _ticketPrice);
@@ -62,7 +62,8 @@ contract Event is ERC721URIStorage, Ownable {
     string memory _location,
     uint supply, 
     uint _ticketPrice,
-    address _verifierAddr
+    address _verifierAddr,
+    address _hasherAddr
     ) ERC721(_name, "ZKEV") public {
 
         evName = _name;
@@ -74,7 +75,9 @@ contract Event is ERC721URIStorage, Ownable {
         evOwner = _organizer;
         location = _location;
         
-        merkleTreeAddress = new MerkleTree(supply);
+        require(supply < 17, "ticket supply should be less than 16");
+        merkleTreeAddress = new MerkleTree(supply, _hasherAddr);
+        
         verifierAddr = _verifierAddr;
     }
 
@@ -112,27 +115,23 @@ contract Event is ERC721URIStorage, Ownable {
         // Update the URI!!!
         _setTokenURI(newItemId, finalTokenUri);
         
-        string memory info = Base64.encode(
-            bytes(
-                string(
-                    abi.encodePacked(
-                        '"receiver address": "',
-                        stringSender,
-                        '", "tokenId": "',
-                        Strings.toString(newItemId),
-                        '", "tokenURI": "',
-                        finalTokenUri,
-                        '"}'
-                    )
-                )
+        uint256 info = uint256(keccak256(
+            abi.encodePacked(
+                '"receiver address": "',
+                stringSender,
+                '", "tokenId": "',
+                Strings.toString(newItemId),
+                '", "tokenURI": "',
+                finalTokenUri,
+                '"}'
             )
-        );
+        ));
 
-        merkleTreeAddress.addData(info);
+        uint32 index = merkleTreeAddress.insert(info);
         _tokenIds.increment();
         available--;
 
-        emit TicketPurchased(msg.sender, quantity, block.timestamp, newItemId);
+        emit TicketPurchased(msg.sender, block.timestamp, index, info, newItemId);
     }
 
     /**
@@ -216,13 +215,17 @@ contract Event is ERC721URIStorage, Ownable {
         return (evOwner, evName, startDate, endDate, description, location, ticketPrice, available);
     }
     
-    /**
+    // /**
     
-    @dev get the merkletree leaves
-    @return array of leaves
-    */
-    function getMerkleTreeLeaves() public view returns (bytes32[] memory) {
+    // @dev get the merkletree leaves
+    // @return array of leaves
+    // */
+    function getMerkleTreeLeaves() public view returns (uint256[] memory) {
         return merkleTreeAddress.getLeaves();
+    }
+    
+    function getZeroValues() public view returns (uint256) {
+        return merkleTreeAddress.getZero();
     }
 
     function getTotalTicketMinted() external view returns (uint256) {

@@ -1,12 +1,13 @@
-import { BigNumber } from "ethers";
+import { BigNumber, providers } from "ethers";
 import { useEffect, useState } from "react";
 import {
-    useAccount, useContract, useProvider, useSigner
+    useAccount, useContract, useSigner
 } from "wagmi";
 import eventAbi from "../contract/Event.json";
+import networks from "../contract/networks.json";
 export default function EventBox({ event }) {
     const { data: accountData } = useAccount();
-    const provider = useProvider();
+    const provider = providers.getDefaultProvider(networks["HarmonyTestNet"].rpcUrls[0])
     const { data: signer, isSuccess } = useSigner();
 
     const account = useAccount();
@@ -50,20 +51,20 @@ export default function EventBox({ event }) {
     const [ticketMinted, updateTicketMinted] = useState(0);
     useEffect(() => {
         const getTicketMinted = async () => {
-            const result = await eventContract.getTotalTicketMinted();
-            updateTicketMinted(result.toNumber());
+            const result = (await eventContract.getTotalTicketMinted()).toNumber();
+            updateTicketMinted(ticketMinted => ticketMinted < result ? result : ticketMinted);
         }
         if(isSuccess) { getTicketMinted() };
-    }, []);
+    }, [ticketMinted]);
     
     const [ticketAvailable, updateTicketAvailable] = useState(0);
     useEffect(() => {
         const getTicketAvailable = async () => {
-            const result = await eventContract.getTotalTicketAvailables();
-            updateTicketAvailable(result.toNumber());
+            const result = (await eventContract.getTotalTicketAvailables()).toNumber();
+            updateTicketAvailable(ticketAvalaiable => ticketAvalaiable > result ? result : ticketAvailable);
         }
         if (isSuccess) { getTicketAvailable() };
-    }, []);
+    }, [ticketAvailable]);
 
     const renderPurchaseTicket = () => {
         const contractWrite = async (event) => {

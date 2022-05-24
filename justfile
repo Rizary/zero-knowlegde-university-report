@@ -12,7 +12,7 @@ circuit:
   just circuits/build
   
 contract-testnet:
-  just contracts/deploy-harmony
+  just contracts/deploy-harmony-testnet
   
 contract-mainnet:
   just contracts/deploy-harmony-mainnet

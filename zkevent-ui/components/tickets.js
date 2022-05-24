@@ -3,7 +3,8 @@ import { BigNumber, providers } from "ethers";
 import { utils } from "ffjavascript";
 import { MerkleTree } from 'fixed-merkle-tree';
 import { useEffect, useState } from "react";
-import useSWR from 'swr';
+import { plonk } from 'snarkjs';
+// import useSWR from 'swr';
 import {
     useAccount, useContract, useSigner
 } from "wagmi";
@@ -13,6 +14,7 @@ import { PoseidonHasher } from '../utils/hasher';
 const ZERO_ELEMENT = "1937035142596246788172577232054709726386880441279550832067530347910661804397"
 
 export default function TicketBox({ event }) {
+    const WITNESS_FILE = '../public/zkproof/witness1';
     const {data: signer} = useSigner();
     const unstringifyBigInts = utils.unstringifyBigInts;
 
@@ -76,10 +78,10 @@ export default function TicketBox({ event }) {
     useEffect(() => {
         const getTicketArray = async () => {
             const result = (await eventContract.balanceOf(accountData.address))?.toNumber();
-            updateTicketArray([...Array(result)])
+            updateTicketArray(ticketArray => ticketArray.length < result ? [...Array(result)] : ticketArray)
         }
         getTicketArray();
-    }, []);
+    }, [ticketArray]);
     
     let [merkleTreeLeaves, setMerkleTreeLeaves] = useState([]);
     useEffect(() => {
@@ -95,9 +97,10 @@ export default function TicketBox({ event }) {
     let [publicSignals, setPublicSignals] = useState("");
 
     let [proofResult, setProofResult] = useState(false);
-                
-    const fetcher = (url) => fetch(url).then((res) => res.json());
-    const { data, error } = useSWR('/api/readfile', fetcher);
+    
+    let [isProved, setIsProved] = useState(false);
+    // const fetcher = (url) => fetch(url).then((res) => res.json());
+    // const { data, error } = useSWR('/api/readfile', fetcher);
     const renderVerifyTicket = (index) => {
         const contractVerify = async (event) => {
             event.preventDefault();
@@ -108,28 +111,39 @@ export default function TicketBox({ event }) {
             }
 
             const tree = new MerkleTree(16, [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16], {
-                hashFunction: (left, right) => poseidon.hash(left, right).toString(),
+                hashFunction: (left, right) => poseidon.hash(BigNumber.from(left), BigNumber.from(right)).toString(),
                 zeroElement: ZERO_ELEMENT
             })
 
             const path = tree.proof(3);
-            console.log(data.result);
-            // console.log(path);
+            console.log(path);
 
-            const wc = require("../public/zkproof/witness_calculator.js");
-            const witnessCalculator = await wc(data.result);
-            const buffer = await witnessCalculator.calculateWTNSBin({
-                "leaf": 4,
-                "root": tree.root,
-                "pathElements": path.pathElements,
-                "pathIndices": path.pathIndices
-            });
+            // const wc = require("../public/zkproof/witness_calculator.js");
+            // console.log(data["result"]);
+            // const witnessCalculator = await wc(data["result"]);
+            // const buffer = await witnessCalculator.calculateWTNSBin({
+            //     "leaf": 4,
+            //     "root": tree.root,
+            //     "pathElements": path.pathElements,
+            //     "pathIndices": path.pathIndices
+            // });
+            // fs.writeFileSync(WITNESS_FILE, buffer);
             const { proof: _proof, publicSignals: _publicSignals } =
                 await plonk.prove(
                     "/zkproof/merkleproof_final.zkey",
-                    buffer
+                    "/zkproof/witness.wtns"
                 );
-
+            // const { proof: _proof, publicSignals: _publicSignals } =
+            //     await plonk.fullProve(
+            //         {
+            //             "leaf": 4,
+            //             "root": tree.root,
+            //             "pathElements": path.pathElements,
+            //             "pathIndices": path.pathIndices
+            //         },
+            //         "/zkproof/merkleproof.wasm",
+            //         "/zkproof/merkleproof_final.zkey",
+            //     );
             const calldata = await plonk.exportSolidityCallData(
                 unstringifyBigInts(_proof),
                 unstringifyBigInts(_publicSignals)
@@ -139,19 +153,19 @@ export default function TicketBox({ event }) {
                 .replace(/["[\]\s]/g, "")
                 .split(",");
             const [proof, ...rest] = argv;
-            const publicSignals = rest;
-            console.log(proof);
-            console.log(publicSignals);
+            const publicSignals = rest.map((x) => BigInt(x).toString());;
 
             try {
                 const _veifierResult = await eventContract.verifyTicketEvent(
                     proof,
                     publicSignals,
                 );
+                setIsProved(true);
                 setProofResult(_veifierResult);
                 console.log(_veifierResult);
               } catch (err) {
                 setProofResult(false);
+                setIsProved(false)
                 console.log(err);
             }
         };
@@ -166,11 +180,11 @@ export default function TicketBox({ event }) {
                     </button>
                 </form> 
                 <div className="p-4">
-                {proof && (
+                {isProved ?  (
                 <div>
                     <div className="p-4">
                       <span className="p-4 border-t border-b text-xs text-gray-700">
-                        Proof:
+                        Proof: {proof}
                       </span>
                       <span className="flex items-left mb-1" width={1 / 2}>{proof}</span>
                     </div>
@@ -185,7 +199,7 @@ export default function TicketBox({ event }) {
                       </span>
                     </div>
                 </div>
-                )}
+                ): <div></div>}
               </div>
             </div>
         );
@@ -194,7 +208,7 @@ export default function TicketBox({ event }) {
     const createTicketList = () => {
         return (ticketArray.map((_, i) => {
             return (
-                <div className="c-card block bg-white shadow-md hover:shadow-xl rounded-lg overflow-hidden" key={i}>
+                <div className="c-card block mt-4 bg-white shadow-md hover:shadow-xl rounded-lg overflow-hidden" key={i}>
                 <div className="p-4">
                     <span className="inline-block px-2 py-1 leading-none bg-orange-200 text-orange-800 rounded-full font-semibold uppercase tracking-wide text-xs"> Event </span>
                 </div>

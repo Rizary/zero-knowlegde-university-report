@@ -8,8 +8,20 @@ list:
 
 alias help := default
 
-deploy-harmony:
+compile-hasher:
+  npx hardhat hasher
+
+deploy-poseidon-testnet:
+  npx hardhat poseidon --network harmonyTestnet
+  
+deploy-poseidon-mainnet:
+  npx hardhat poseidon --network harmonyMainnet
+
+deploy-hasher-testnet: 
+  npx hardhat run scripts/deployHasher.js --network harmonyTestnet
+
+deploy-harmony-testnet: deploy-poseidon-testnet
   npx hardhat run scripts/deploy.js --network harmonyTestnet
 
-deploy-harmony-mainnet:
+deploy-harmony-mainnet: deploy-poseidon-mainnet
   npx hardhat run scripts/deploy.js --network harmonyMainnet

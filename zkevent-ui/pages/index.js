@@ -1,34 +1,21 @@
+import { providers } from "ethers";
 import { useEffect, useState } from "react";
-import { useAccount, useConnect, useContract, useDisconnect, useProvider, useSigner } from "wagmi";
+import { useAccount, useConnect, useContract, useDisconnect, useSigner } from "wagmi";
 import EventBox from "../components/events";
 import TicketBox from "../components/tickets";
 import contractAddress from "../contract/address.json";
 import eventFactoryAbi from "../contract/EventFactory.json";
-// import networks from "../contract/networks.json";
+import networks from "../contract/networks.json";
 
 export default function Home() {
-    // const network = networks["HarmonyTestNet"];
-    // const provider = new providers.JsonRpcProvider(
-    //     network.rpcUrls[0],
-    //     {
-    //         chainId: network.chainId,
-    //         name: network.name
-    //     });
-    // const account = provider.getSigner();
-    // const [account, updateAccount] = useState();
-    // useEffect(() => {
-    //     const getAccount = async () => {
-    //         const acc = await useAccount();
-    //         updateAccount(acc);
-    //     }
-    //     getAccount();
-    // }, []);
-    const { data: connectData, error, connect, connectors, isConnected, activeConnector } = useConnect();
+    const { connect, connectors, isConnected, activeConnector } = useConnect();
 
     const { data: accountData } = useAccount();
     const { disconnect } = useDisconnect()
-    const provider = useProvider();
-    const { data: signer, isSuccess } = useSigner();
+    // const provider = useProvider();
+    const provider = providers.getDefaultProvider(networks["HarmonyTestNet"].rpcUrls[0])
+    
+    const { data: signer} = useSigner();
   
     const mainContract = useContract({
         addressOrName: contractAddress.EventFactory,
@@ -118,7 +105,7 @@ export default function Home() {
                 event.target.name.value,
                 event.target.start.value,
                 event.target.end.value,
-                30,
+                16,
                 event.target.price.value,
                 event.target.desc.value,
                 event.target.loc.value,
@@ -169,13 +156,11 @@ export default function Home() {
     useEffect(() => {
         const getEventD = async () => {
             const allEvent = await mainContract.getDeployedEvents();
-            updateEvent(allEvent);
+            updateEvent(events => events < allEvent ? allEvent : events);
             allEvent == undefined ? setBusy(true) : setBusy(false);
         }
-        // if (isSuccess) {
         getEventD();
-        // }
-    }, []);
+    }, [events, updateEvent]);
 
     const renderEvents = () => {
       return (

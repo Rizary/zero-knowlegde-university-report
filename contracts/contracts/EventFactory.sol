@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -14,7 +14,7 @@ contract EventFactory {
 
     Event[] public deployedEvents;
     
-    event eventCreated(Event _address, string _name, uint _ticketPrice, string location, uint startDate, uint endDate, string indexed _filterName, string indexed _filterLocation);
+    event EventCreated(Event _address, string _name, uint _ticketPrice, string location, uint startDate, uint endDate, string indexed _filterName);
 
 
     /**
@@ -27,12 +27,12 @@ contract EventFactory {
     @param _description description of the event 
     @param _location location of the event
     */
-    function createEvent(string memory  _name, uint _start, uint _end,  uint supply, uint _ticketPrice, string memory _description, string memory _location, address verifierAddress) public  {
+    function createEvent(string memory  _name, uint _start, uint _end,  uint supply, uint _ticketPrice, string memory _description, string memory _location, address verifierAddress, address hasherAddress) public  {
         require(!halted);
         address payable sender = payable(msg.sender);
-        Event newEvent = new Event(sender, _name, _start, _end,_description, _location, supply, _ticketPrice, verifierAddress );
+        Event newEvent = new Event(sender, _name, _start, _end,_description, _location, supply, _ticketPrice, verifierAddress, hasherAddress );
         deployedEvents.push(newEvent);
-        emit eventCreated(newEvent, _name, _ticketPrice, _location, _start, _end, _name, _location);
+        emit EventCreated(newEvent, _name, _ticketPrice, _location, _start, _end, _name);
     }
 
     /**

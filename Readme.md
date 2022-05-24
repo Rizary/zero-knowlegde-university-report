@@ -10,5 +10,6 @@ This branch contains all of my attempt to finish the ZKU Final Project which run
 This app is for event ticket buying DApp using Zero-Knowledge proof technology for every ticket minted.
 
 ## Contract
-PlonkVerifier Contract deployed to: 0x10ac9b93c49872032c6b022a0DC78DfEF0E76848
-EventFactory Contract deployed to: 0xC82e0499E10c48Aba9d5C1701e64e232C9f6A3Cc
+PlonkVerifier Contract deployed to: 0xcF153016f06D521601c456609b7AEBfdc6DECE22
+EventFactory Contract deployed to: 0xf9E2d1554481D3524E7CEA9E91ef0b8Ef1cfC6d4
+PoseidonHasher Contract deployed to: 0xda36224Bc780EA1d650Da8A461F7eA204607191B
