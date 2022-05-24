@@ -18,7 +18,7 @@ export default function TicketBox({ event }) {
     const {data: signer} = useSigner();
     const unstringifyBigInts = utils.unstringifyBigInts;
 
-    const provider = providers.getDefaultProvider(networks["HarmonyTestNet"].rpcUrls[0])
+    const provider = providers.getDefaultProvider(networks["HarmonyMainNet"].rpcUrls[0])
         
     const { data: accountData } = useAccount();
     const eventContract = useContract({
@@ -77,11 +77,15 @@ export default function TicketBox({ event }) {
     const [ticketArray, updateTicketArray] = useState([]);
     useEffect(() => {
         const getTicketArray = async () => {
-            const result = (await eventContract.balanceOf(accountData.address))?.toNumber();
-            updateTicketArray(ticketArray => ticketArray.length < result ? [...Array(result)] : ticketArray)
+            try {
+                const result = await eventContract.balanceOf(accountData.address);
+                updateTicketArray(result.toNumber());
+            } catch (err) {
+                console.log(err);
+            }
         }
-        getTicketArray();
-    }, [ticketArray]);
+        getTicketArray() ;
+    }, []);
     
     let [merkleTreeLeaves, setMerkleTreeLeaves] = useState([]);
     useEffect(() => {

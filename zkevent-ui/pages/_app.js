@@ -35,23 +35,13 @@ const connectors = () => {
   
 
 function MyApp({ Component, pageProps }) {
-    const testNet = networks["HarmonyTestNet"];
     const mainNet = networks["HarmonyMainNet"];
-    if (env == "development") {
-      provider = new providers.JsonRpcProvider(
-        testNet.rpcUrls[0],
-        {
-            chainId: testNet.chainId,
-            name: testNet.name
-      });
-    } else {
-      provider = new providers.JsonRpcProvider(
+    provider = new providers.JsonRpcProvider(
         mainNet.rpcUrls[0],
         {
             chainId: mainNet.chainId,
             name: mainNet.name
-        });
-    }
+    });
     return (
       <>
         <Head>
