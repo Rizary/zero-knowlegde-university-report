@@ -156,15 +156,14 @@ export default function Home() {
     useEffect(() => {
         const getEventD = async () => {
             const allEvent = await mainContract.getDeployedEvents();
-            if (events === undefined) { updateEvent(allEvent) };
-            if (events.length < allEvent.length) { updateEvent(allEvent) };
+            updateEvent(allEvent)
 
             allEvent == undefined ? setBusy(true) : setBusy(false);
         }
-        if(isConnected && !signer.isLoading){
+        if(signer.isSuccess){
             getEventD();
         }
-    }, [events]);
+    }, []);
 
     const renderEvents = () => {
       return (
