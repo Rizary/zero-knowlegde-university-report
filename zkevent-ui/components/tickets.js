@@ -90,8 +90,12 @@ export default function TicketBox({ event }) {
     let [merkleTreeLeaves, setMerkleTreeLeaves] = useState([]);
     useEffect(() => {
         const getMerkleTreeLeaves = async () => {
-            const result = await eventContract.getMerkleTreeLeaves();
-            setMerkleTreeLeaves(result)
+            try {
+                const result = await eventContract.getMerkleTreeLeaves();
+                setMerkleTreeLeaves(result);
+            } catch (err) {
+                console.log(err);
+            }
         }
         getMerkleTreeLeaves();
     }, []);
