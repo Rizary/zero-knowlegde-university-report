@@ -110,12 +110,12 @@ export default function TicketBox({ event }) {
                 leaves.push(BigNumber.from(merkleTreeLeaves[i]).toString());
             }
 
-            const tree = new MerkleTree(16, [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16], {
+            const tree = new MerkleTree(16, leaves, {
                 hashFunction: (left, right) => poseidon.hash(BigNumber.from(left), BigNumber.from(right)).toString(),
                 zeroElement: ZERO_ELEMENT
             })
-
-            const path = tree.proof(3);
+            console.log("index number: ", index);
+            const path = tree.proof(leaves[index]);
             console.log(path);
 
             // const wc = require("../public/zkproof/witness_calculator.js");
@@ -128,22 +128,22 @@ export default function TicketBox({ event }) {
             //     "pathIndices": path.pathIndices
             // });
             // fs.writeFileSync(WITNESS_FILE, buffer);
-            const { proof: _proof, publicSignals: _publicSignals } =
-                await plonk.prove(
-                    "/zkproof/merkleproof_final.zkey",
-                    "/zkproof/witness.wtns"
-                );
             // const { proof: _proof, publicSignals: _publicSignals } =
-            //     await plonk.fullProve(
-            //         {
-            //             "leaf": 4,
-            //             "root": tree.root,
-            //             "pathElements": path.pathElements,
-            //             "pathIndices": path.pathIndices
-            //         },
-            //         "/zkproof/merkleproof.wasm",
+            //     await plonk.prove(
             //         "/zkproof/merkleproof_final.zkey",
+            //         "/zkproof/witness.wtns"
             //     );
+            const { proof: _proof, publicSignals: _publicSignals } =
+                await plonk.fullProve(
+                    {
+                        "leaf": leaves[index],
+                        "root": tree.root,
+                        "pathElements": path.pathElements,
+                        "pathIndices": path.pathIndices
+                    },
+                    "/zkproof/merkleproof.wasm",
+                    "/zkproof/merkleproof_final.zkey",
+                );
             const calldata = await plonk.exportSolidityCallData(
                 unstringifyBigInts(_proof),
                 unstringifyBigInts(_publicSignals)
