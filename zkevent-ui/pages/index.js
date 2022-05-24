@@ -12,15 +12,14 @@ export default function Home() {
 
     const { data: accountData } = useAccount();
     const { disconnect } = useDisconnect()
-    // const provider = useProvider();
     const provider = providers.getDefaultProvider(networks["HarmonyTestNet"].rpcUrls[0])
     
-    const signer  = useSigner();
+    const {data: signer, isSuccess}  = useSigner();
   
     const mainContract = useContract({
         addressOrName: contractAddress.EventFactory,
         contractInterface: eventFactoryAbi.abi,
-        signerOrProvider: signer?.data || provider,
+        signerOrProvider: signer || provider,
     });
 
     const renderConnectWallet = () => {
@@ -61,7 +60,7 @@ export default function Home() {
             )
         }
     };
-    
+
     const getEventList = () => {
         return (
             <div>
@@ -69,9 +68,9 @@ export default function Home() {
             </div>
         )
     };
-        
+
     const createEventList = () => {
-        return (isBusy? <div></div> : events.map((event, index) => {
+        return (events.map((event, index) => {
             return (
                 <div className="container mx-auto" key={index}>
                     <div className="flex flex-wrap -mx-4">
@@ -85,7 +84,7 @@ export default function Home() {
     };
     
     const createTicketList = () => {
-        return (isBusy? <div></div> : events.map((event, index) => {
+        return (events.map((event, index) => {
             return (
                 <div className="container mx-auto" key={index}>
                     <div className="flex flex-wrap -mx-4">
@@ -155,14 +154,16 @@ export default function Home() {
     const [events, updateEvent] = useState([]);
     useEffect(() => {
         const getEventD = async () => {
-            const allEvent = await mainContract.getDeployedEvents();
-            updateEvent(allEvent)
-
-            allEvent == undefined ? setBusy(true) : setBusy(false);
+            try {
+                const allEvent = await mainContract.getDeployedEvents();
+                updateEvent(allEvent);
+                allEvent == undefined ? setBusy(true) : setBusy(false);
+            } catch (err) {
+                console.log(err);
+            }
         }
-        if(signer.isSuccess){
-            getEventD();
-        }
+        getEventD();
+        
     }, []);
 
     const renderEvents = () => {
