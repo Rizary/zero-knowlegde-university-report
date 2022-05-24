@@ -26,7 +26,7 @@ export default function Home() {
         if (!accountData?.address) {
             return (
                 <button
-                    className="text-lg font-medium rounded-md px-5 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500"
+                    className="text-lg font-medium rounded-md px-5 py-3 bg-blue-500 text-white"
                     onClick={() => {
                         connect(connectors[0]);
                     }}
