@@ -18,7 +18,7 @@ export default function TicketBox({ event }) {
     const {data: signer} = useSigner();
     const unstringifyBigInts = utils.unstringifyBigInts;
 
-    const provider = providers.getDefaultProvider(networks["HarmonyMainNet"].rpcUrls[0])
+    const provider = providers.getDefaultProvider(networks["HarmonyTestNet"].rpcUrls[0])
         
     const { data: accountData } = useAccount();
     const eventContract = useContract({

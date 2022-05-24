@@ -7,7 +7,7 @@ import eventAbi from "../contract/Event.json";
 import networks from "../contract/networks.json";
 export default function EventBox({ event }) {
     const { data: accountData } = useAccount();
-    const provider = providers.getDefaultProvider(networks["HarmonyMainNet"].rpcUrls[0])
+    const provider = providers.getDefaultProvider(networks["HarmonyTestNet"].rpcUrls[0])
     const { data: signer, isSuccess } = useSigner();
 
     const account = useAccount();
