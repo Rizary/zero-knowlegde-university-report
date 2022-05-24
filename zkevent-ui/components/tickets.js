@@ -79,7 +79,7 @@ export default function TicketBox({ event }) {
         const getTicketArray = async () => {
             try {
                 const result = await eventContract.balanceOf(accountData.address);
-                updateTicketArray(result.toNumber());
+                updateTicketArray([...Array(result.toNumber())]);
             } catch (err) {
                 console.log(err);
             }
