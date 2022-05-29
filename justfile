@@ -9,7 +9,7 @@ list:
 alias help := default
 
 circuit:
-  just circuits/build
+  just circuits/all-circom
   
 contract-testnet:
   just contracts/deploy-harmony-testnet
