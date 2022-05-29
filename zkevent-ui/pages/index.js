@@ -6,10 +6,17 @@ import TicketBox from "../components/tickets";
 import contractAddress from "../contract/address.json";
 import eventFactoryAbi from "../contract/EventFactory.json";
 import networks from "../contract/networks.json";
+import Modal from "../utils/modal";
 
 export default function Home() {
     const { connect, connectors, isConnected, activeConnector } = useConnect();
-
+    const [modalOn, setModalOn] = useState(false);
+    const [commitment, setCommitment] = useState ({
+        key: "",
+        secret: "",
+        commitment: "",
+    });
+    const [eventIdentity, updateEventIdentity] = useState();
     const { data: accountData } = useAccount();
     const { disconnect } = useDisconnect()
     const provider = providers.getDefaultProvider(networks["HarmonyTestNet"].rpcUrls[0])
@@ -68,7 +75,7 @@ export default function Home() {
             </div>
         )
     };
-
+    
     const createEventList = () => {
         return (events.map((event, index) => {
             return (
@@ -76,6 +83,12 @@ export default function Home() {
                     <div className="flex flex-wrap -mx-4">
                         <EventBox
                             event={event}
+                            commitment={commitment}
+                            setCommitment={setCommitment}
+                            modalOn={modalOn}
+                            setModalOn={setModalOn}
+                            eventIdentity={eventIdentity}
+                            updateEventIdentity={updateEventIdentity}
                         />
                     </div>
                 </div>
@@ -186,7 +199,7 @@ export default function Home() {
             </div> 
             <div className="py-4">
                 <h1 className={"text-2xl font-bold underline"}>
-                    My Tickets:
+                    Ticket Verification:
                 </h1>
                 {createTicketList()}
             </div>
@@ -200,8 +213,9 @@ export default function Home() {
             <h1 className={"text-3xl font-bold underline"}>
             Welcome to ZKEvent
             </h1>
-                <div>{renderConnectWallet()}</div>
-                <div>{renderAccount()}</div>
+            <div>{renderConnectWallet()}</div>
+            <div>{renderAccount()}</div>
+            <div>{modalOn && <Modal setModalOn={setModalOn} commitment={commitment} />}</div> 
         </main>
         </div>
     )

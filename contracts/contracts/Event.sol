@@ -19,7 +19,7 @@ interface IVerifier {
 }
 
 /** @title Event */
-contract Event is ERC721URIStorage, Ownable {
+contract Event is MerkleTree, Ownable {
     address public verifierAddr;
     string public evName;
     address public evOwner;
@@ -37,11 +37,15 @@ contract Event is ERC721URIStorage, Ownable {
     
     MerkleTree public merkleTreeAddress;
    
-    event TicketPurchased(address purchaser, uint date, uint32 index, uint256 info, uint256 newItemId);
+    event TicketPurchased(address purchaser, uint date, uint32 index, uint256 info, uint256 newItemId, uint256 commitment);
     event TicketTransfered(address _from, address _to, uint256 _tokenIds);
     event PaymentCollected(address _event, address _organizer, uint256 _balance);
     event TicketRefunded(address _event, address _requestedBy, uint256 _tokenIds, uint256 _ticketPrice);
 
+    mapping(uint256 => bool) public nullifierHashes;
+    // we store all commitments just to prevent accidental deposits with the same commitment
+    mapping(uint256 => bool) public commitments;
+    mapping(address => uint32) public addressToIndex;
 
     /**@dev created new instance of Event
     @param _organizer account address of event organizer creating the event 
@@ -64,7 +68,7 @@ contract Event is ERC721URIStorage, Ownable {
     uint _ticketPrice,
     address _verifierAddr,
     address _hasherAddr
-    ) ERC721(_name, "ZKEV") public {
+    ) MerkleTree(supply, _hasherAddr) public {
 
         evName = _name;
         startDate = _start;
@@ -76,44 +80,48 @@ contract Event is ERC721URIStorage, Ownable {
         location = _location;
         
         require(supply < 17, "ticket supply should be less than 16");
-        merkleTreeAddress = new MerkleTree(supply, _hasherAddr);
+        // merkleTreeAddress = new MerkleTree(supply, _hasherAddr);
         
         verifierAddr = _verifierAddr;
     }
 
     /**
     @dev allows user to purchase ticket for the event
-    @param quantity total amount of ticket the user wishes to purchase maximum amount is 5
+    @param _purchaser the purchaser of the ticket
+    @param _commitment commitment of the purchaser
     */
-    function purchaseTicket(address receiverAddress, uint256 quantity) public payable {
-        require(available  >= quantity, "not enough ticket quantity available!!!");
-        require(msg.value >= SafeMath.mul(ticketPrice, quantity), "not enough money sent");
+    // function purchaseTicket(address receiverAddress, uint256 quantity) public payable {
+    function purchaseTicket(address _purchaser, uint256 _commitment) public payable {
+        require(available  < 17, "not enough ticket quantity available!!!");
+        require(msg.value >= SafeMath.mul(ticketPrice, 0), "not enough money sent");
+        
+        require(!commitments[_commitment], "The commitment has been submitted");
         uint256 newItemId;
         uint256[] memory allItemId;
         string memory stringSender = Strings.toHexString(uint(uint160(msg.sender)));
-        address payable minter = payable(receiverAddress);
+        // address payable minter = payable(receiverAddress);
         newItemId = _tokenIds.current();
-        string memory json = Base64.encode(
-            bytes(
-                string(
-                    abi.encodePacked(
-                        '"event_name": "',
-                        evName,
-                        '", "description": "',
-                        description,
-                        '"}'
-                    )
-                )
-            )
-        );
-        string memory finalTokenUri = string(
-            abi.encodePacked("data:application/json;base64,", json)
-        );
+        // string memory json = Base64.encode(
+        //     bytes(
+        //         string(
+        //             abi.encodePacked(
+        //                 '"event_name": "',
+        //                 evName,
+        //                 '", "description": "',
+        //                 description,
+        //                 '"}'
+        //             )
+        //         )
+        //     )
+        // );
+        // string memory finalTokenUri = string(
+        //     abi.encodePacked("data:application/json;base64,", json)
+        // );
 
-        _safeMint(minter, newItemId);
+        // _safeMint(minter, newItemId);
         
-        // Update the URI!!!
-        _setTokenURI(newItemId, finalTokenUri);
+        // // Update the URI!!!
+        // _setTokenURI(newItemId, finalTokenUri);
         
         uint256 info = uint256(keccak256(
             abi.encodePacked(
@@ -121,17 +129,19 @@ contract Event is ERC721URIStorage, Ownable {
                 stringSender,
                 '", "tokenId": "',
                 Strings.toString(newItemId),
-                '", "tokenURI": "',
-                finalTokenUri,
+                '", "commitment": "',
+                _commitment,
                 '"}'
             )
         ));
 
-        uint32 index = merkleTreeAddress.insert(info);
+        uint32 index = insert(_commitment);
+        commitments[_commitment] = true;
+        addressToIndex[_purchaser] = index;
         _tokenIds.increment();
         available--;
 
-        emit TicketPurchased(msg.sender, block.timestamp, index, info, newItemId);
+        emit TicketPurchased(msg.sender, block.timestamp, index, info, newItemId, _commitment);
     }
 
     /**
@@ -140,27 +150,27 @@ contract Event is ERC721URIStorage, Ownable {
     @param _to address of the reciever 
     @param _tokenId id of the ticket to be transfered
     */
-    function transferTicket(address _to, uint _tokenId) public {
-        require(address(0) != _to, "invalid address provided");
-        transferFrom(msg.sender, _to, _tokenId);
-        emit TicketTransfered(msg.sender, _to, _tokenId);
-    }
+    // function transferTicket(address _to, uint _tokenId) public {
+    //     require(address(0) != _to, "invalid address provided");
+    //     transferFrom(msg.sender, _to, _tokenId);
+    //     emit TicketTransfered(msg.sender, _to, _tokenId);
+    // }
 
 
-    /**
-    @dev validated if a given ticket id is owned by the given user 
-    @param _owner address of the owner of ticket to be validated
-    @param _tokenIds id of the ticket to be validated
-    @return x boolean value holding the result 
-    */
-    function isTicketValid(address _owner, uint _tokenIds) onlyOwner public returns(bool) {
-        if(ownerOf(_tokenIds) == _owner) {
-            _burn(_tokenIds);
-            return true;
-        }  else {
-            return false;
-        }
-    }
+    // /**
+    // @dev validated if a given ticket id is owned by the given user 
+    // @param _owner address of the owner of ticket to be validated
+    // @param _tokenIds id of the ticket to be validated
+    // @return x boolean value holding the result 
+    // */
+    // function isTicketValid(address _owner, uint _tokenIds) onlyOwner public returns(bool) {
+    //     if(ownerOf(_tokenIds) == _owner) {
+    //         _burn(_tokenIds);
+    //         return true;
+    //     }  else {
+    //         return false;
+    //     }
+    // }
 
 
     /**
@@ -178,25 +188,25 @@ contract Event is ERC721URIStorage, Ownable {
     @dev lets event organizer get one collected for tickets sold for the event
      */
 
-    function collectPayment() onlyOwner public {
-        // require(now > endDate && !canceled, "can not collect payment before the event is over");
-        //owner.transfer(address(this).balance);
-        selfdestruct(payable(msg.sender));
-        emit PaymentCollected(address(this), msg.sender, address(this).balance );
-    }
+    // function collectPayment() onlyOwner public {
+    //     // require(now > endDate && !canceled, "can not collect payment before the event is over");
+    //     //owner.transfer(address(this).balance);
+    //     selfdestruct(payable(msg.sender));
+    //     emit PaymentCollected(address(this), msg.sender, address(this).balance );
+    // }
 
     /**
     
     @dev returns one for each ticket the user has in case the event is canceled
     @param ticket id of the ticket to get refunds for
      */
-    function getRefund(uint  ticket) public {
-        require(address(0) != msg.sender, "invalid address provided");
-        require(canceled, "refund is only available for cacanceled events");
-            _burn(ticket);
-        payable(msg.sender).transfer(ticketPrice);
-        emit TicketRefunded(address(this), msg.sender, ticket, ticketPrice);
-    }
+    // function getRefund(uint  ticket) public {
+    //     require(address(0) != msg.sender, "invalid address provided");
+    //     require(canceled, "refund is only available for cacanceled events");
+    //         _burn(ticket);
+    //     payable(msg.sender).transfer(ticketPrice);
+    //     emit TicketRefunded(address(this), msg.sender, ticket, ticketPrice);
+    // }
 
     /**
     
@@ -204,10 +214,15 @@ contract Event is ERC721URIStorage, Ownable {
     @return true or false
     */
     
-    function isCanceled() public view returns(bool) {
-        return canceled;
-    }
+    // function isCanceled() public view returns(bool) {
+    //     return canceled;
+    // }
     
+    /** @dev whether a ticket is already spent */
+    function isSpent(uint256 _nullifierHash) public view returns (bool) {
+        return nullifierHashes[_nullifierHash];
+    }
+
     /**
     @dev returns event identity
     @return deployedEvents array of event address */
@@ -221,11 +236,15 @@ contract Event is ERC721URIStorage, Ownable {
     // @return array of leaves
     // */
     function getMerkleTreeLeaves() public view returns (uint256[] memory) {
-        return merkleTreeAddress.getLeaves();
+        return getLeaves();
     }
     
     function getZeroValues() public view returns (uint256) {
-        return merkleTreeAddress.getZero();
+        return getZero();
+    }
+    
+    function getAddressIndex(address _purchaser) public view returns (uint32) {
+        return addressToIndex[_purchaser];
     }
 
     function getTotalTicketMinted() external view returns (uint256) {

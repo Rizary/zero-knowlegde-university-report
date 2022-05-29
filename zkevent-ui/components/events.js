@@ -5,7 +5,10 @@ import {
 } from "wagmi";
 import eventAbi from "../contract/Event.json";
 import networks from "../contract/networks.json";
-export default function EventBox({ event }) {
+import { createCommitment, rbigint, toHex } from "../utils/hasher";
+const ffj = require("ffjavascript");
+const { unstringifyBigInts, leBuff2int, leInt2Buff } = ffj.utils;
+export default function EventBox({ event, commitment, setCommitment, modalOn, setModalOn, eventIdentity, updateEventIdentity }) {
     const { data: accountData } = useAccount();
     const provider = providers.getDefaultProvider(networks["HarmonyTestNet"].rpcUrls[0])
     const { data: signer, isSuccess } = useSigner();
@@ -17,7 +20,7 @@ export default function EventBox({ event }) {
         signerOrProvider: signer || provider,
     });
     const [isBusy, setBusy] = useState(true)
-    const [eventIdentity, updateEventIdentity] = useState();
+
     useEffect(() => {
         const getEventIdentity = async () => {
             try {
@@ -79,14 +82,26 @@ export default function EventBox({ event }) {
     const renderPurchaseTicket = () => {
         const contractWrite = async (event) => {
             event.preventDefault();
+            const bytesKey = rbigint(31)
+            const hexKey = toHex(bytesKey);
+            setCommitment({...commitment, key: hexKey})
+            
+            const bytesSecret = rbigint(31)
+            const hexSecret = toHex(bytesSecret);
+            setCommitment({...commitment, secret: hexSecret})
+            
+            const comm = await createCommitment(hexKey, hexSecret);
+            setCommitment({ ...commitment, commitment: comm });
+            console.log(comm.commitment.pedersenResult)
             eventContract.purchaseTicket(
                 accountData.address,
-                BigNumber.from(1),
+                BigNumber.from(comm.commitment.pedersenResult),
                 {
                     "from": accountData.address,
-                    "value": eventIdentity["price"],
+                    // "value": eventIdentity["price"],
                 },
             )
+            setModalOn(true);
         };
         return (
             <form onSubmit={contractWrite}>
